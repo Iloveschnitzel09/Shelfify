@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/etEan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="EAN eingeben"
+            android:inputType="number"
+            android:textColor="@color/teal_200"
+            android:textColorHint="#AAAAAA"
+            android:backgroundTint="@color/teal_200"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnCheckEan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="EAN prüfen"
+            android:backgroundTint="@color/teal_200"
+            android:textColor="@color/teal_700"
+            android:layout_marginBottom="24dp" />
+    </LinearLayout>
+</ScrollView>

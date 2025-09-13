@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="E-Mail für Ablaufbenachrichtigungen"
+            android:textColor="@color/teal_200"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/teal_200"
+            android:hint="E-Mail-Adresse eingeben"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/teal_200"
+            android:textColorHint="#AAAAAA" />
+
+        <Button
+            android:id="@+id/btnSaveEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/teal_200"
+            android:text="E-Mail speichern"
+            android:textColor="@color/teal_700" />
+
+        <TextView
+            android:id="@+id/tvVerificationStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Verifizierungsstatus: Nicht verifiziert"
+            android:textColor="@color/teal_200" />
+
+        <LinearLayout
+            android:id="@+id/verificationContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etVerificationCode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/teal_200"
+                android:hint="Verifizierungscode"
+                android:inputType="number"
+                android:maxLength="6"
+                android:textColor="@color/teal_200"
+                android:textColorHint="#AAAAAA" />
+
+            <Button
+                android:id="@+id/btnVerify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="@color/teal_200"
+                android:text="Verifizieren"
+                android:textColor="@color/teal_700" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnRequestCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/teal_200"
+            android:text="Verifizierungscode anfordern"
+            android:textColor="@color/teal_700" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Benachrichtigungen immer Montags um 7Uhr"
+            android:textColor="@color/teal_200"
+            android:textSize="16sp" />
+
+        <Switch
+            android:id="@+id/switchNotifications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="Benachrichtigungen aktivieren"
+            android:textColor="@color/teal_200"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+<!--        <EditText-->
+<!--            android:id="@+id/etdatengroup"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_weight="1"-->
+<!--            android:backgroundTint="@color/teal_200"-->
+<!--            android:hint="Email"-->
+<!--            android:inputType="number"-->
+<!--            android:maxLength="8"-->
+<!--            android:textColor="@color/teal_200"-->
+<!--            android:textColorHint="#AAAAAA" />-->
+
+<!--        <LinearLayout-->
+<!--            android:id="@+id/datengroup"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginBottom="16dp"-->
+<!--            android:orientation="horizontal">-->
+
+<!--            <Button-->
+<!--                android:id="@+id/btnSetDatagroup"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginStart="8dp"-->
+<!--                android:backgroundTint="@color/teal_200"-->
+<!--                android:text="Code setzten"-->
+<!--                android:textColor="@color/teal_700" />-->
+
+<!--            <Button-->
+<!--                android:id="@+id/btnNewDatagroup"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginStart="8dp"-->
+<!--                android:backgroundTint="@color/teal_200"-->
+<!--                android:text="Neuen Code"-->
+<!--                android:textColor="@color/teal_700" />-->
+
+<!--        </LinearLayout>-->
+    </LinearLayout>
+</ScrollView>

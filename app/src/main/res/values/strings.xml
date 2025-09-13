@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Shelfify</string>
+    <string name="produkte_werden_geladen">Produkte werden geladen...</string>
+    <string name="ean_eingeben">EAN eingeben</string>
+</resources>
