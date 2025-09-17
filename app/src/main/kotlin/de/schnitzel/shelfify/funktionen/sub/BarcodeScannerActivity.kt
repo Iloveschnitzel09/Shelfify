@@ -1,4 +1,4 @@
-package de.schnitzel.shelfify.funktionen
+package de.schnitzel.shelfify.funktionen.sub
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -9,7 +9,12 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
+import androidx.camera.core.TorchState
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -67,7 +72,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
     }
 
     private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        val cameraProviderFuture = ProcessCameraProvider.Companion.getInstance(this)
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()

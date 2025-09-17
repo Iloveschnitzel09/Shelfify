@@ -27,7 +27,7 @@
         <activity android:name=".funktionen.AddProductActivity"/>
         <activity android:name=".funktionen.RemoveProductActivity"/>
         <activity android:name=".funktionen.SettingsActivity" />
-        <activity android:name=".funktionen.BarcodeScannerActivity" />
+        <activity android:name=".funktionen.sub.BarcodeScannerActivity" />
 
         <activity android:name=".MainActivity"
             android:exported="true">
@@ -35,7 +35,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
 
-                <data android:scheme="myapp"
+                <data android:scheme="shelfify"
                     android:host="invite"/>
             </intent-filter>
         </activity>

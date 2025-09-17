@@ -46,7 +46,7 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
         builder.setPositiveButton(
             "OK",
             DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
-                val selectedDays = numberPicker.getValue()
+                val selectedDays = numberPicker.value
                 loadSpoiledProducts(selectedDays) // Hier wird dein Request mit den ausgewählten Tagen gestartet
             })
 

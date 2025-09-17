@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig
+import de.schnitzel.shelfify.funktionen.sub.BarcodeScannerActivity
 import java.net.HttpURLConnection
 import java.net.URL
 
