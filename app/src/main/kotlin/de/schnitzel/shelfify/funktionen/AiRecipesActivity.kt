@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.util.Recipe
-import de.schnitzel.shelfify.util.RecipeAdapter
+import de.schnitzel.shelfify.util.adapter.RecipeAdapter
 
 class AiRecipesActivity : AppCompatActivity() {
 

@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiClient
 import de.schnitzel.shelfify.api.ProductApi
-import de.schnitzel.shelfify.util.ProductAdapter
+import de.schnitzel.shelfify.util.adapter.ProductAdapter
 import de.schnitzel.shelfify.util.Products
 import retrofit2.Call
 import retrofit2.Callback

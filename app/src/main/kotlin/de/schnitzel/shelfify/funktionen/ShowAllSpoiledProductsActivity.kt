@@ -12,7 +12,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig
-import de.schnitzel.shelfify.util.ProductAdapter
+import de.schnitzel.shelfify.util.adapter.ProductAdapter
 import de.schnitzel.shelfify.util.Products
 import okhttp3.Call
 import okhttp3.Callback
@@ -27,7 +27,7 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_show_all_spoiled_products)
+        setContentView(R.layout.activity_show_all)
         
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -46,7 +46,7 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
         builder.setPositiveButton(
             "OK",
             DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
-                val selectedDays = numberPicker.getValue()
+                val selectedDays = numberPicker.value
                 loadSpoiledProducts(selectedDays) // Hier wird dein Request mit den ausgewählten Tagen gestartet
             })
 

@@ -1,4 +1,4 @@
-package de.schnitzel.shelfify.util
+package de.schnitzel.shelfify.util.adapter
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
+import de.schnitzel.shelfify.util.Products
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
