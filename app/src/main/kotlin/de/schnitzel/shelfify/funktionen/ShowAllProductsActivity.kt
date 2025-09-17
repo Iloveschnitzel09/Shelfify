@@ -22,9 +22,9 @@ class ShowAllProductsActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_showallproducts)
+        setContentView(R.layout.activity_show_all)
 
-        recyclerView = findViewById(R.id.recyclerView) // muss in deinem XML sein!
+        recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val api = ApiClient.client.create(ProductApi::class.java)

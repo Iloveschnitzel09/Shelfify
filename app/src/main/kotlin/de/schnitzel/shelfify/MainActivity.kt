@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import de.schnitzel.shelfify.api.ApiConfig
 import de.schnitzel.shelfify.funktionen.AddProductActivity
+import de.schnitzel.shelfify.funktionen.AiRecipesActivity
 import de.schnitzel.shelfify.funktionen.RemoveProductActivity
 import de.schnitzel.shelfify.funktionen.SettingsActivity
 import de.schnitzel.shelfify.funktionen.ShowAllProductsActivity
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         val btnAdd: Button = findViewById(R.id.btnAddProduct)
         val btnRemove: Button = findViewById(R.id.btnRemoveProduct)
         val btnSettings: Button = findViewById(R.id.btnSettings)
+        val btnRecipes: Button = findViewById(R.id.btnRecipes)
         val btnSync: Button = findViewById(R.id.btnSync)
 
         // Klick-Events
@@ -51,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         btnSearch.setOnClickListener { startActivity(Intent(this, ShowAllSpoiledProductsActivity::class.java)) }
         btnAdd.setOnClickListener { startActivity(Intent(this, AddProductActivity::class.java)) }
         btnRemove.setOnClickListener { startActivity(Intent(this, RemoveProductActivity::class.java)) }
+        btnRecipes.setOnClickListener { startActivity(Intent(this, AiRecipesActivity::class.java)) }
         btnSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
 
         btnSync.setOnClickListener {
