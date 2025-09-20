@@ -10,11 +10,11 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.NumberPicker
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig
+import de.schnitzel.shelfify.funktionen.sub.BarcodeScannerActivity
 import java.io.BufferedReader
 import java.net.HttpURLConnection
 import java.net.URL

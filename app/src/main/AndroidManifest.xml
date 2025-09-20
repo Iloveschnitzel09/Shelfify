@@ -27,7 +27,7 @@
         <activity android:name=".funktionen.AddProductActivity"/>
         <activity android:name=".funktionen.RemoveProductActivity"/>
         <activity android:name=".funktionen.SettingsActivity" />
-        <activity android:name=".funktionen.BarcodeScannerActivity" />
+        <activity android:name=".funktionen.sub.BarcodeScannerActivity" />
 
         <activity android:name=".MainActivity"
             android:exported="true">
