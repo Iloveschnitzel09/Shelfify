@@ -2,4 +2,8 @@
     <string name="app_name">Shelfify</string>
     <string name="produkte_werden_geladen">Produkte werden geladen...</string>
     <string name="ean_eingeben">EAN eingeben</string>
+    <string name="hint_datagroup_1">Hinweis: Wenn Sie eine Gruppe verlassen, verlieren Sie den Zugriff auf die gemeinsamen Lebensmitteldaten.</string>
+    <string name="hint_datagroup_0">Laden Sie Familienmitglieder oder Mitbewohner ein, um gemeinsam Lebensmittel zu verwalten und Benachrichtigungen zu teilen.</string>
+    <string name="hint_email">Hier können Sie die E-Mail-Adresse eingeben, an die Sie Benachrichtigungen über ablaufende Lebensmittel erhalten möchten.</string>
+    <string name="hint_verify">Verifizieren Sie Ihre E-Mail-Adresse, um sicherzustellen, dass Sie alle Benachrichtigungen erhalten.</string>
 </resources>

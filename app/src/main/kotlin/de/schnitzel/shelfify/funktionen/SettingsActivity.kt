@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig
+import de.schnitzel.shelfify.funktionen.sub.joinGroup
+import inviteGroup
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -30,6 +32,12 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var switchNotifications: Switch
     private lateinit var btnVerify: Button
     private lateinit var btnRequestCode: Button
+    private lateinit var btnInvite: Button
+    private lateinit var btnLeave: Button
+
+    private lateinit var etJoinCode: EditText
+    private lateinit var btnJoin: Button
+    private lateinit var etInviteEmail: EditText
 
     private val baseUrl: String = ApiConfig.BASE_URL
 
@@ -46,6 +54,12 @@ class SettingsActivity : AppCompatActivity() {
         switchNotifications = findViewById(R.id.switchNotifications)
         btnRequestCode = findViewById(R.id.btnRequestCode)
         btnVerify = findViewById(R.id.btnVerify)
+        btnInvite = findViewById(R.id.btnInvite)
+        etInviteEmail = findViewById(R.id.etInviteEmail)
+        btnLeave = findViewById(R.id.btnLeave)
+        etJoinCode = findViewById(R.id.etJoinCode)
+        btnJoin = findViewById(R.id.btnJoin)
+
         val btnSaveEmail: Button = findViewById(R.id.btnSaveEmail)
 
         val email = prefs.getString("email", "null") ?: "null"
@@ -91,6 +105,26 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, "E-Mail muss erst verifiziert werden", Toast.LENGTH_SHORT).show()
             }
         }
+
+        btnInvite.setOnClickListener {
+            val email = etInviteEmail.text.toString().trim()
+            if (!isValidEmail(email)) {
+                Toast.makeText(this, "Bitte gültige E-Mail-Adresse eingeben", Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            inviteGroup( prefs, email,this)
+        }
+
+        btnJoin.setOnClickListener {
+            val code = etJoinCode.text.toString()
+            if (code.isEmpty() || code.length != 6) {
+                Toast.makeText(this, "Bitte gültigen Einladungscode eingeben", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            joinGroup(prefs, code, this)
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -134,7 +168,8 @@ class SettingsActivity : AppCompatActivity() {
         Thread {
             try {
                 runOnUiThread {
-                    object : CountDownTimer(60000, 1000) {
+                    btnRequestCode.isEnabled = false
+                     object : CountDownTimer(60000, 1000) {
                         @SuppressLint("SetTextI18n")
                         override fun onTick(millisUntilFinished: Long) {
                             btnRequestCode.text = "Erneut senden in ${millisUntilFinished / 1000}s"
@@ -164,9 +199,7 @@ class SettingsActivity : AppCompatActivity() {
                 runOnUiThread {
                     if (responseCode == 200) {
                         Toast.makeText(this, "Verifizierungscode wurde gesendet", Toast.LENGTH_SHORT).show()
-                        btnRequestCode.isEnabled = false
                         loadCurrentSettings(prefs)
-
                     } else {
                         Toast.makeText(this, "Fehler beim Senden des Codes$responseCode", Toast.LENGTH_SHORT).show()
                     }
@@ -232,7 +265,7 @@ class SettingsActivity : AppCompatActivity() {
                 val responseCode = conn.responseCode
                 runOnUiThread {
                     if (responseCode == 200) {
-                        prefs.edit().putBoolean("notify", notify).apply()
+                        prefs.edit { putBoolean("notify", notify) }
                         Toast.makeText(this, "Benachrichtigungseinstellungen gespeichert", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(this, "Fehler beim Speichern der Einstellungen", Toast.LENGTH_SHORT).show()

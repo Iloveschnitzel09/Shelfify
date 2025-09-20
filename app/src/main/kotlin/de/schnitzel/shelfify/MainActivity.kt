@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,18 +26,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
-
         // App-Synchronisation beim Start
         syncWithServer(this)
-
-//        intent?.data?.let { data ->
-//            val datagroup = data.getQueryParameter("datagroup")
-//            datagroup?.let {
-//                val joinDatagroup = JoinDatagroup(it)
-//                startActivity(Intent(this, joinDatagroup::class.java))
-//            }
-//        }
 
         // Buttons aus Layout
         val btnShowAll: Button = findViewById(R.id.btnShowAllProducts)
@@ -95,4 +86,6 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
     }
+
+    val prefs: SharedPreferences get() = getSharedPreferences("AppPrefs", MODE_PRIVATE)
 }
