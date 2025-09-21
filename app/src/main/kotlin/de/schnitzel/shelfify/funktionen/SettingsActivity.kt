@@ -17,8 +17,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig
-import de.schnitzel.shelfify.funktionen.sub.joinGroup
-import inviteGroup
+import de.schnitzel.shelfify.funktionen.sub.DatagroupService
+import de.schnitzel.shelfify.funktionen.sub.DatagroupService.inviteGroup
+import de.schnitzel.shelfify.funktionen.sub.DatagroupService.joinGroup
+import de.schnitzel.shelfify.funktionen.sub.DatagroupService.leaveGroup
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -33,10 +35,9 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnVerify: Button
     private lateinit var btnRequestCode: Button
     private lateinit var btnInvite: Button
-    private lateinit var btnLeave: Button
-
     private lateinit var etJoinCode: EditText
     private lateinit var btnJoin: Button
+    private lateinit var btnLeave: Button
     private lateinit var etInviteEmail: EditText
 
     private val baseUrl: String = ApiConfig.BASE_URL
@@ -56,9 +57,9 @@ class SettingsActivity : AppCompatActivity() {
         btnVerify = findViewById(R.id.btnVerify)
         btnInvite = findViewById(R.id.btnInvite)
         etInviteEmail = findViewById(R.id.etInviteEmail)
-        btnLeave = findViewById(R.id.btnLeave)
         etJoinCode = findViewById(R.id.etJoinCode)
         btnJoin = findViewById(R.id.btnJoin)
+        btnLeave = findViewById(R.id.btnLeave)
 
         val btnSaveEmail: Button = findViewById(R.id.btnSaveEmail)
 
@@ -107,6 +108,8 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         btnInvite.setOnClickListener {
+            disableButton(btnInvite, " Warte ", " Einladen ", 30)
+
             val email = etInviteEmail.text.toString().trim()
             if (!isValidEmail(email)) {
                 Toast.makeText(this, "Bitte gültige E-Mail-Adresse eingeben", Toast.LENGTH_SHORT)
@@ -114,7 +117,7 @@ class SettingsActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            inviteGroup( prefs, email,this)
+            inviteGroup(prefs, email,this)
         }
 
         btnJoin.setOnClickListener {
@@ -124,6 +127,10 @@ class SettingsActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             joinGroup(prefs, code, this)
+        }
+
+        btnLeave.setOnClickListener {
+            leaveGroup(prefs, this)
         }
     }
 
@@ -167,22 +174,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun requestVerificationCode(email: String, token: String, prefs: SharedPreferences) {
         Thread {
             try {
-                runOnUiThread {
-                    btnRequestCode.isEnabled = false
-                     object : CountDownTimer(60000, 1000) {
-                        @SuppressLint("SetTextI18n")
-                        override fun onTick(millisUntilFinished: Long) {
-                            btnRequestCode.text = "Erneut senden in ${millisUntilFinished / 1000}s"
-                        }
-
-
-                        @SuppressLint("SetTextI18n")
-                        override fun onFinish() {
-                            btnRequestCode.isEnabled = true
-                            btnRequestCode.text = "Code erneut anfordern"
-                        }
-                    }.start()
-                }
+                disableButton(btnRequestCode, "Erneut senden in", "Code erneut anfordern", 60 )
 
                 val url = URL("$baseUrl/requestVerificode")
                 val conn = url.openConnection() as HttpURLConnection
@@ -334,5 +326,23 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    private fun disableButton(button: Button, tickText: String, finishText: String, seconds: Long) {
+        runOnUiThread {
+            button.isEnabled = false
+            object : CountDownTimer(seconds * 1000, 1000) {
+                @SuppressLint("SetTextI18n")
+                override fun onTick(millisUntilFinished: Long) {
+                    button.text = "$tickText ${millisUntilFinished / 1000}s"
+                }
+
+
+                override fun onFinish() {
+                    button.isEnabled = true
+                    button.text = finishText
+                }
+            }.start()
+        }
     }
 }
