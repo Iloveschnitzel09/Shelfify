@@ -1,6 +1,7 @@
 package de.schnitzel.shelfify.funktionen
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
@@ -17,10 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig
+import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.inviteGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.joinGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.leaveGroup
+import de.schnitzel.shelfify.util.disableButton
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -130,7 +133,14 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         btnLeave.setOnClickListener {
-            leaveGroup(prefs, this)
+            AlertDialog.Builder(this)
+                .setTitle("Gruppe verlassen")
+                .setMessage("Bist du sicher, dass du die Datengruppe verlassen möchtest?")
+                .setPositiveButton("Ja") { _, _ ->
+                    leaveGroup(prefs, this)
+                }
+                .setNegativeButton("Abbrechen", null)
+                .show()
         }
     }
 
@@ -174,21 +184,16 @@ class SettingsActivity : AppCompatActivity() {
     private fun requestVerificationCode(email: String, token: String, prefs: SharedPreferences) {
         Thread {
             try {
+                val conn = URL("$BASE_URL/requestVerificode?email=${URLEncoder.encode(email, "UTF-8")}&token=$token")
+                    .openConnection() as HttpURLConnection
+
                 disableButton(btnRequestCode, "Erneut senden in", "Code erneut anfordern", 60 )
 
-                val url = URL("$baseUrl/requestVerificode")
-                val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
-                conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-
-                val postData = "email=${URLEncoder.encode(email, "UTF-8")}&token=$token"
-                conn.outputStream.use { os ->
-                    os.write(postData.toByteArray(StandardCharsets.UTF_8))
-                }
                 val responseCode = conn.responseCode
 
                 runOnUiThread {
+
                     if (responseCode == 200) {
                         Toast.makeText(this, "Verifizierungscode wurde gesendet", Toast.LENGTH_SHORT).show()
                         loadCurrentSettings(prefs)
@@ -326,23 +331,5 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-
-    private fun disableButton(button: Button, tickText: String, finishText: String, seconds: Long) {
-        runOnUiThread {
-            button.isEnabled = false
-            object : CountDownTimer(seconds * 1000, 1000) {
-                @SuppressLint("SetTextI18n")
-                override fun onTick(millisUntilFinished: Long) {
-                    button.text = "$tickText ${millisUntilFinished / 1000}s"
-                }
-
-
-                override fun onFinish() {
-                    button.isEnabled = true
-                    button.text = finishText
-                }
-            }.start()
-        }
     }
 }

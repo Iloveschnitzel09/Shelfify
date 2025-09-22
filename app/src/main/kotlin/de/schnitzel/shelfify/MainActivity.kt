@@ -14,6 +14,7 @@ import de.schnitzel.shelfify.funktionen.RemoveProductActivity
 import de.schnitzel.shelfify.funktionen.SettingsActivity
 import de.schnitzel.shelfify.funktionen.ShowAllProductsActivity
 import de.schnitzel.shelfify.funktionen.ShowAllSpoiledProductsActivity
+import de.schnitzel.shelfify.util.disableButton
 import de.schnitzel.shelfify.util.syncWithServer
 import java.net.HttpURLConnection
 import java.net.URL
@@ -45,8 +46,8 @@ class MainActivity : AppCompatActivity() {
         btnSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
 
         btnSync.setOnClickListener {
+            disableButton(btnSync, "x", "↻", 5)
             syncWithServer(this)
-            delete(prefs)
         }
     }
 
