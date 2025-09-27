@@ -12,6 +12,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig
+import de.schnitzel.shelfify.api.productRequest
+import de.schnitzel.shelfify.prefs
 import de.schnitzel.shelfify.util.ProductAdapter
 import de.schnitzel.shelfify.util.Products
 import okhttp3.Call
@@ -58,45 +60,23 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
     }
 
     private fun loadSpoiledProducts(days: Int) {
-        val url = "${ApiConfig.BASE_URL}/spoiledProducts?days=$days"
+        val token = prefs.getString("token", "null")
+        val id = prefs.getInt("app_id", -1)
+        val url = "${ApiConfig.BASE_URL}/spoiledProducts?days=$days&id=$id&token=$token"
 
-        // Netzwerk-Request mit OkHttp
+        recyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
         val client = OkHttpClient()
         val request = Request.Builder()
             .url(url)
             .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    // JSON-Response auslesen
-                    val jsonResponse = response.body?.string()
-
-                    // JSON in eine Liste von Produkten umwandeln
-                    val gson = Gson()
-                    val listType = object : TypeToken<List<Products>>() {}.type
-                    val products = gson.fromJson<List<Products>>(jsonResponse, listType)
-
-                    runOnUiThread {
-                        // RecyclerView mit den Produkten aktualisieren
-                        productAdapter = ProductAdapter(products ?: emptyList())
-                        recyclerView.adapter = productAdapter
-                    }
-                } else {
-                    runOnUiThread {
-                        // Fehlerbehandlung falls die Antwort nicht erfolgreich ist
-                        Toast.makeText(applicationContext, "Fehler beim Laden der Produkte", Toast.LENGTH_SHORT).show()
-                    }
-                }
+        Thread {
+            val data = productRequest(request, client)
+            runOnUiThread {
+                recyclerView.adapter = data
             }
-
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    // Fehlerbehandlung bei Netzwerkproblemen
-                    Toast.makeText(applicationContext, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
+        }.start()
     }
 
 

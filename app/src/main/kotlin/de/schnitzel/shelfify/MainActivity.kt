@@ -1,5 +1,6 @@
 package de.schnitzel.shelfify
 
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
@@ -21,11 +22,13 @@ import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+lateinit var prefs: SharedPreferences
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
 
         // App-Synchronisation beim Start
         syncWithServer(this)
@@ -51,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun delete(prefs: SharedPreferences) {
+    private fun delete() {
         Thread {
             try {
                 val token = prefs.getString("token", "null")
@@ -87,6 +90,4 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
     }
-
-    val prefs: SharedPreferences get() = getSharedPreferences("AppPrefs", MODE_PRIVATE)
 }

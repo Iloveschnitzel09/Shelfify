@@ -23,6 +23,7 @@ import de.schnitzel.shelfify.funktionen.sub.DatagroupService
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.inviteGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.joinGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.leaveGroup
+import de.schnitzel.shelfify.prefs
 import de.schnitzel.shelfify.util.disableButton
 import java.net.HttpURLConnection
 import java.net.URL
@@ -42,14 +43,12 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnJoin: Button
     private lateinit var btnLeave: Button
     private lateinit var etInviteEmail: EditText
-
     private val baseUrl: String = ApiConfig.BASE_URL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
 
         // UI-Elemente initialisieren
         editTextEmail = findViewById(R.id.etEmail)
