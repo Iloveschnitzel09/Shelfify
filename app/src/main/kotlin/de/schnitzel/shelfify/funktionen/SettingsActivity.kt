@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.util.Log
 import android.util.Patterns
 import android.widget.Button
@@ -17,9 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import de.schnitzel.shelfify.R
-import de.schnitzel.shelfify.api.ApiConfig
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
-import de.schnitzel.shelfify.funktionen.sub.DatagroupService
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.inviteGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.joinGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.leaveGroup
@@ -34,6 +31,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var editTextEmail: EditText
     private lateinit var editTextVerificationCode: EditText
     private lateinit var tvVerificationStatus: TextView
+
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private lateinit var switchNotifications: Switch
     private lateinit var btnVerify: Button
@@ -43,7 +41,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnJoin: Button
     private lateinit var btnLeave: Button
     private lateinit var etInviteEmail: EditText
-    private val baseUrl: String = ApiConfig.BASE_URL
+    private val baseUrl: String = BASE_URL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +74,8 @@ class SettingsActivity : AppCompatActivity() {
             if (isValidEmail(etemail)) {
                 saveEmail(etemail, prefs)
             } else {
-                Toast.makeText(this, "Bitte gültige E-Mail-Adresse eingeben", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bitte gültige E-Mail-Adresse eingeben", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
@@ -84,7 +83,8 @@ class SettingsActivity : AppCompatActivity() {
             if (email != "null" || token != "null") {
                 requestVerificationCode(email, token, prefs)
             } else {
-                Toast.makeText(this, "Bitte gültige E-Mail-Adresse eingeben", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bitte gültige E-Mail-Adresse eingeben", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
@@ -93,7 +93,8 @@ class SettingsActivity : AppCompatActivity() {
             if (code.length == 6) {
                 verifyCode(email, code, token, prefs)
             } else {
-                Toast.makeText(this, "Bitte gültigen 6-stelligen Code eingeben", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bitte gültigen 6-stelligen Code eingeben", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
@@ -105,7 +106,8 @@ class SettingsActivity : AppCompatActivity() {
                 switchNotifications.isChecked = false
                 setNotificationPreference(email, false, token, prefs)
                 prefs.edit { putBoolean("verify", false) }
-                Toast.makeText(this, "E-Mail muss erst verifiziert werden", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "E-Mail muss erst verifiziert werden", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
@@ -119,13 +121,14 @@ class SettingsActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            inviteGroup(prefs, email,this)
+            inviteGroup(prefs, email, this)
         }
 
         btnJoin.setOnClickListener {
             val code = etJoinCode.text.toString()
             if (code.isEmpty() || code.length != 6) {
-                Toast.makeText(this, "Bitte gültigen Einladungscode eingeben", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Bitte gültigen Einladungscode eingeben", Toast.LENGTH_SHORT)
+                    .show()
                 return@setOnClickListener
             }
             joinGroup(prefs, code, this)
@@ -183,10 +186,17 @@ class SettingsActivity : AppCompatActivity() {
     private fun requestVerificationCode(email: String, token: String, prefs: SharedPreferences) {
         Thread {
             try {
-                val conn = URL("$BASE_URL/requestVerificode?email=${URLEncoder.encode(email, "UTF-8")}&token=$token")
+                val conn = URL(
+                    "$BASE_URL/requestVerificode?email=${
+                        URLEncoder.encode(
+                            email,
+                            "UTF-8"
+                        )
+                    }&token=$token"
+                )
                     .openConnection() as HttpURLConnection
 
-                disableButton(btnRequestCode, "Erneut senden in", "Code erneut anfordern", 60 )
+                disableButton(btnRequestCode, "Erneut senden in ", "Code erneut anfordern", 60)
 
                 conn.requestMethod = "POST"
                 val responseCode = conn.responseCode
@@ -194,10 +204,18 @@ class SettingsActivity : AppCompatActivity() {
                 runOnUiThread {
 
                     if (responseCode == 200) {
-                        Toast.makeText(this, "Verifizierungscode wurde gesendet", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Verifizierungscode wurde gesendet",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         loadCurrentSettings(prefs)
                     } else {
-                        Toast.makeText(this, "Fehler beim Senden des Codes$responseCode", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Fehler beim Senden des Codes$responseCode",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
                 conn.disconnect()
@@ -217,7 +235,12 @@ class SettingsActivity : AppCompatActivity() {
                 conn.doOutput = true
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
 
-                val postData = "email=${URLEncoder.encode(email, "UTF-8")}&code=${URLEncoder.encode(code, "UTF-8")}&token=$token"
+                val postData = "email=${URLEncoder.encode(email, "UTF-8")}&code=${
+                    URLEncoder.encode(
+                        code,
+                        "UTF-8"
+                    )
+                }&token=$token"
                 conn.outputStream.use { os ->
                     os.write(postData.toByteArray(StandardCharsets.UTF_8))
                 }
@@ -225,7 +248,8 @@ class SettingsActivity : AppCompatActivity() {
                 val responseCode = conn.responseCode
                 runOnUiThread {
                     if (responseCode == 200) {
-                        Toast.makeText(this, "E-Mail erfolgreich verifiziert", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "E-Mail erfolgreich verifiziert", Toast.LENGTH_SHORT)
+                            .show()
                         prefs.edit { putBoolean("verify", true) }
                         loadCurrentSettings(prefs)
                     } else {
@@ -239,7 +263,12 @@ class SettingsActivity : AppCompatActivity() {
         }.start()
     }
 
-    private fun setNotificationPreference(email: String, notify: Boolean, token: String, prefs: SharedPreferences) {
+    private fun setNotificationPreference(
+        email: String,
+        notify: Boolean,
+        token: String,
+        prefs: SharedPreferences
+    ) {
         Thread {
             try {
                 val url = URL("$baseUrl/setNotifyPreference")
@@ -262,9 +291,17 @@ class SettingsActivity : AppCompatActivity() {
                 runOnUiThread {
                     if (responseCode == 200) {
                         prefs.edit { putBoolean("notify", notify) }
-                        Toast.makeText(this, "Benachrichtigungseinstellungen gespeichert", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Benachrichtigungseinstellungen gespeichert",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
-                        Toast.makeText(this, "Fehler beim Speichern der Einstellungen", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Fehler beim Speichern der Einstellungen",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         switchNotifications.isChecked = !notify
                     }
                 }
@@ -284,7 +321,13 @@ class SettingsActivity : AppCompatActivity() {
                 val token = prefs.getString("token", null)
                 Log.v("test", "$token $id")
                 if (id == -1 || token == null) {
-                    runOnUiThread { Toast.makeText(this, "App-ID oder Token fehlt", Toast.LENGTH_SHORT).show() }
+                    runOnUiThread {
+                        Toast.makeText(
+                            this,
+                            "App-ID oder Token fehlt",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                     return@Thread
                 }
 
@@ -306,7 +349,8 @@ class SettingsActivity : AppCompatActivity() {
                 runOnUiThread {
                     when (responseCode) {
                         200 -> {
-                            Toast.makeText(this, "E-Mail-Adresse gespeichert", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "E-Mail-Adresse gespeichert", Toast.LENGTH_SHORT)
+                                .show()
                             prefs.edit().apply {
                                 putString("email", email)
                                 putBoolean("verify", false)
@@ -315,9 +359,16 @@ class SettingsActivity : AppCompatActivity() {
                             }
                             loadCurrentSettings(prefs)
                         }
-                        409 -> Toast.makeText(this, "Diese E-Mail wird bereits verwendet", Toast.LENGTH_SHORT).show()
+
+                        409 -> Toast.makeText(
+                            this,
+                            "Diese E-Mail wird bereits verwendet",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
                         401 -> Toast.makeText(this, "Ungültiger Token", Toast.LENGTH_SHORT).show()
-                        else -> Toast.makeText(this, "Fehler beim Speichern", Toast.LENGTH_SHORT).show()
+                        else -> Toast.makeText(this, "Fehler beim Speichern", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
 

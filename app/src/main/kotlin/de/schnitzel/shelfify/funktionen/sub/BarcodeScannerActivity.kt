@@ -78,7 +78,8 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 cameraProvider = cameraProviderFuture.get()
                 bindPreviewAndAnalyzer()
             } catch (e: Exception) {
-                Toast.makeText(this, "Kamera konnte nicht gestartet werden", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Kamera konnte nicht gestartet werden", Toast.LENGTH_SHORT)
+                    .show()
                 finish()
             }
         }, ContextCompat.getMainExecutor(this))
@@ -124,7 +125,8 @@ class BarcodeScannerActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Kamera konnte nicht initialisiert werden", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Kamera konnte nicht initialisiert werden", Toast.LENGTH_SHORT)
+                .show()
             finish()
         }
     }

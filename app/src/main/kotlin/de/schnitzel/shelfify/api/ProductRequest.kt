@@ -8,6 +8,7 @@ import de.schnitzel.shelfify.util.Products
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
+
 fun productRequest(request: Request, client: OkHttpClient): ProductAdapter? {
     try {
         val response = client.newCall(request).execute()
