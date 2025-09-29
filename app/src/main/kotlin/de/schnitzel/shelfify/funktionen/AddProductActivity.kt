@@ -14,7 +14,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig
+import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.sub.BarcodeScannerActivity
+import de.schnitzel.shelfify.prefs
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.BufferedReader
 import java.net.HttpURLConnection
 import java.net.URL
@@ -28,14 +33,15 @@ class AddProductActivity : AppCompatActivity() {
     private lateinit var editTextEan: EditText
     private lateinit var editTextProductName: EditText
     private lateinit var editTextDate: EditText
-    private var baseUrl = ApiConfig.BASE_URL
+    private var addEan = false
 
-    private var barcodeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK && result.data != null) {
-            val ean = result.data?.getStringExtra("ean")
-            editTextEan.setText(ean)
+    private var barcodeLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                val ean = result.data?.getStringExtra("ean")
+                editTextEan.setText(ean)
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +62,7 @@ class AddProductActivity : AppCompatActivity() {
             barcodeLauncher.launch(intent)
         }
 
+
         buttonCheckEan.setOnClickListener {
             val ean = editTextEan.text.toString()
             if (ean.isNotEmpty()) {
@@ -75,30 +82,26 @@ class AddProductActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            addNewProduct(ean, name, datum)
+            addNewProduct(ean, name, datum, addEan)
         }
     }
 
     private fun openCustomDatePicker() {
-        // Aktuelles Datum
         val calendar = Calendar.getInstance()
         val currentYear = calendar.get(Calendar.YEAR)
-        val currentMonth = calendar.get(Calendar.MONTH) // 0-based!
+        val currentMonth = calendar.get(Calendar.MONTH)
         val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
 
-        // Layout mit horizontalem LinearLayout
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.HORIZONTAL
         layout.setPadding(20, 20, 20, 20)
         layout.gravity = Gravity.CENTER
 
-        // Year Picker
         val yearPicker = NumberPicker(this)
         yearPicker.minValue = currentYear
-        yearPicker.maxValue = currentYear + 20 // z.B. 20 Jahre in die Zukunft
+        yearPicker.maxValue = currentYear + 20
         yearPicker.value = currentYear
 
-        // Month Picker
         val monthPicker = NumberPicker(this)
         monthPicker.minValue = 1
         monthPicker.maxValue = 12
@@ -110,7 +113,6 @@ class AddProductActivity : AppCompatActivity() {
         dayPicker.maxValue = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
         dayPicker.value = currentDay
 
-        // Monat und Jahr ändern -> Tage aktualisieren
         val dateChangeListener = NumberPicker.OnValueChangeListener { picker, oldVal, newVal ->
             val year = yearPicker.value
             val month = monthPicker.value
@@ -123,12 +125,10 @@ class AddProductActivity : AppCompatActivity() {
         yearPicker.setOnValueChangedListener(dateChangeListener)
         monthPicker.setOnValueChangedListener(dateChangeListener)
 
-        // Picker zur Ansicht hinzufügen
         layout.addView(dayPicker)
         layout.addView(monthPicker)
         layout.addView(yearPicker)
 
-        // Dialog anzeigen
         AlertDialog.Builder(this)
             .setTitle("Ablaufdatum wählen")
             .setView(layout)
@@ -145,31 +145,39 @@ class AddProductActivity : AppCompatActivity() {
     }
 
     private fun checkEan(ean: String) {
-        val url = "$baseUrl/lookupProductName?ean=$ean"
+        val token = prefs.getString("token", "null")
+        val id = prefs.getInt("app_id", -1)
+        val url = "${BASE_URL}/lookupProductName?ean=$ean&id=$id&token=$token"
 
         Thread {
             try {
-                val apiUrl = URL(url)
-                val conn = apiUrl.openConnection() as HttpURLConnection
-                conn.requestMethod = "GET"
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url(url)
+                    .build()
 
-                val code = conn.responseCode
-                if (code == 200) {
-                    val inputStream = conn.inputStream
-                    val reader = BufferedReader(inputStream.reader())
-                    val name = reader.readLine()
+                val response = client.newCall(request).execute()
+
+                if (response.isSuccessful) {
+                    val name = response.body?.string() ?: ""
+
                     runOnUiThread {
                         editTextProductName.setText(name)
-                        editTextProductName.visibility = View.GONE // weil gefunden
+                        editTextProductName.visibility = View.GONE
                         Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
+                        addEan = false
                     }
                 } else {
                     runOnUiThread {
                         editTextProductName.visibility = View.VISIBLE
-                        Toast.makeText(this, "Produktname nicht gefunden – bitte eingeben", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Produktname nicht gefunden – bitte eingeben",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        addEan = true
                     }
                 }
-                conn.disconnect()
             } catch (e: Exception) {
                 runOnUiThread {
                     Toast.makeText(this, "Fehler beim Abrufen", Toast.LENGTH_SHORT).show()
@@ -178,41 +186,53 @@ class AddProductActivity : AppCompatActivity() {
         }.start()
     }
 
-    private fun addNewProduct(ean: String, name: String, datum: String) {
+    private fun addNewProduct(ean: String, name: String, datum: String, add: Boolean) {
         Thread {
             try {
-                // 1. POST an /addEAN
-                val url1 = URL("$baseUrl/addEAN")
-                val conn1 = url1.openConnection() as HttpURLConnection
-                conn1.requestMethod = "POST"
-                conn1.doOutput = true
-                conn1.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                val token = prefs.getString("token", "null")
+                val id = prefs.getInt("app_id", -1)
+                val client = OkHttpClient()
 
-                val postData1 = "ean=${URLEncoder.encode(ean, "UTF-8")}" +
-                        "&name=${URLEncoder.encode(name, "UTF-8")}"
+                if(add) {
+                    val eanFormBody = FormBody.Builder()
+                        .add("ean", ean)
+                        .add("name", name)
+                        .add("id", id.toString())
+                        .add("token", token ?: "")
+                        .build()
 
-                conn1.outputStream.use { os ->
-                    os.write(postData1.toByteArray(StandardCharsets.UTF_8))
-                }
-                conn1.responseCode
-                conn1.disconnect()
+                    val eanRequest = Request.Builder()
+                        .url("$BASE_URL/addEAN")
+                        .post(eanFormBody)
+                        .build()
 
-                // 2. POST an /addProduct
-                val url2 = URL("$baseUrl/addProduct")
-                val conn2 = url2.openConnection() as HttpURLConnection
-                conn2.requestMethod = "POST"
-                conn2.doOutput = true
-                conn2.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                    val response = client.newCall(eanRequest).execute()
 
-                val postData2 = "name=${URLEncoder.encode(name, "UTF-8")}" +
-                        "&ablaufdatum=${URLEncoder.encode(datum, "UTF-8")}"
-
-                conn2.outputStream.use { os ->
-                    os.write(postData2.toByteArray(StandardCharsets.UTF_8))
+                    if (!response.isSuccessful && response.code != 409) {
+                        runOnUiThread {
+                            Toast.makeText(this, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT).show()
+                        }
+                        return@Thread
+                    }
+                    response.close()
                 }
 
-                val responseCode = conn2.responseCode
-                conn2.disconnect()
+                val addProductBody = FormBody.Builder()
+                    .add("name", name)
+                    .add("ablaufdatum", datum)
+                    .add("id", id.toString())
+                    .add("token", token ?: "")
+                    .build()
+
+                val addProductRequest = Request.Builder()
+                    .url("$BASE_URL/addProduct")
+                    .post(addProductBody)
+                    .build()
+
+                val response = client.newCall(addProductRequest).execute()
+
+                val responseCode = response.code
+                response.close()
 
                 runOnUiThread {
                     when (responseCode) {
@@ -224,8 +244,18 @@ class AddProductActivity : AppCompatActivity() {
                             editTextDate.text.clear()
                             editTextProductName.visibility = View.GONE
                         }
-                        409 -> Toast.makeText(this, "Produktname oder EAN existiert bereits", Toast.LENGTH_SHORT).show()
-                        else -> Toast.makeText(this, "Fehler beim Hinzufügen (Code: $responseCode)", Toast.LENGTH_SHORT).show()
+
+                        409 -> Toast.makeText(
+                            this,
+                            "Produktname oder EAN existiert bereits",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        else -> Toast.makeText(
+                            this,
+                            "Fehler beim Hinzufügen (Code: $responseCode)",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } catch (e: Exception) {

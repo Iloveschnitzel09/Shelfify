@@ -17,10 +17,12 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
-class ProductAdapter (private val productList: List<Products>) : RecyclerView.Adapter<ProductAdapter.ViewHolder>() {
+class ProductAdapter(private val productList: List<Products>) :
+    RecyclerView.Adapter<ProductAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_produkte, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_produkte, parent, false)
         return ViewHolder(view)
     }
 
@@ -52,10 +54,12 @@ class ProductAdapter (private val productList: List<Products>) : RecyclerView.Ad
                     // Ablaufdatum ist bereits vergangen
                     holder.tvAblaufdatum.setTextColor(Color.RED)
                 }
+
                 daysBetween <= 3 -> {
                     // Ablaufdatum in 3 Tagen oder weniger
                     holder.tvAblaufdatum.setTextColor("#FFA500".toColorInt())
                 }
+
                 else -> {
                     // Noch nicht abgelaufen
                     holder.tvAblaufdatum.setTextColor("#FF03DAC5".toColorInt())
