@@ -86,10 +86,13 @@ object DatagroupService {
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        400 -> Toast.makeText(activity, "Ungültige Anfrage!", Toast.LENGTH_SHORT)
+                        400 -> Toast.makeText(activity, "Ungültige Email!", Toast.LENGTH_SHORT)
                             .show()
 
                         401 -> Toast.makeText(activity, "Token ungültig!", Toast.LENGTH_SHORT)
+                            .show()
+
+                        403 -> Toast.makeText(activity, "Blockierter Benutzer!", Toast.LENGTH_SHORT)
                             .show()
 
                         else -> Toast.makeText(activity, "Fehler: $code", Toast.LENGTH_SHORT).show()
