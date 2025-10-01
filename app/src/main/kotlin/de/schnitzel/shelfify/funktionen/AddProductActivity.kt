@@ -13,18 +13,12 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import de.schnitzel.shelfify.R
-import de.schnitzel.shelfify.api.ApiConfig
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.sub.BarcodeScannerActivity
 import de.schnitzel.shelfify.prefs
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.io.BufferedReader
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import java.util.Calendar
 import java.util.Locale
 
@@ -193,7 +187,7 @@ class AddProductActivity : AppCompatActivity() {
                 val id = prefs.getInt("app_id", -1)
                 val client = OkHttpClient()
 
-                if(add) {
+                if (add) {
                     val eanFormBody = FormBody.Builder()
                         .add("ean", ean)
                         .add("name", name)
@@ -210,7 +204,8 @@ class AddProductActivity : AppCompatActivity() {
 
                     if (!response.isSuccessful && response.code != 409) {
                         runOnUiThread {
-                            Toast.makeText(this, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT)
+                                .show()
                         }
                         return@Thread
                     }

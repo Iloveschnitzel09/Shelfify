@@ -9,7 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.util.Recipe
 
-class RecipeAdapter (private val recipeList: List<Recipe>) : RecyclerView.Adapter<RecipeAdapter.ViewHolder>() {
+class RecipeAdapter(private val recipeList: List<Recipe>) :
+    RecyclerView.Adapter<RecipeAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.ai_recipes, parent, false)
@@ -34,10 +35,10 @@ class RecipeAdapter (private val recipeList: List<Recipe>) : RecyclerView.Adapte
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvRecipeName : TextView = itemView.findViewById(R.id.tvRecipiename)
-        val tvTime : TextView = itemView.findViewById(R.id.tvTime)
-        val tvIngredients : TextView = itemView.findViewById(R.id.tvIngredients)
-        val tvProcessing : TextView = itemView.findViewById(R.id.tvProcessing)
+        val tvRecipeName: TextView = itemView.findViewById(R.id.tvRecipiename)
+        val tvTime: TextView = itemView.findViewById(R.id.tvTime)
+        val tvIngredients: TextView = itemView.findViewById(R.id.tvIngredients)
+        val tvProcessing: TextView = itemView.findViewById(R.id.tvProcessing)
 
     }
 }
