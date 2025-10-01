@@ -6,12 +6,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
-import de.schnitzel.shelfify.api.ApiConfig
-import de.schnitzel.shelfify.api.productRequest
-import de.schnitzel.shelfify.prefs
 import de.schnitzel.shelfify.util.ProductAdapter
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import de.schnitzel.shelfify.util.Products
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ShowAllProductsActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -20,11 +19,7 @@ class ShowAllProductsActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_showallproducts)
-
-        val token = prefs.getString("token", "null")
-        val id = prefs.getInt("app_id", -1)
-        val url = "${ApiConfig.BASE_URL}/products?id=$id&token=$token"
+        setContentView(R.layout.activity_show_all)
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)

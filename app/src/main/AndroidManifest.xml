@@ -26,6 +26,7 @@
         <activity android:name=".funktionen.ShowAllSpoiledProductsActivity"/>
         <activity android:name=".funktionen.AddProductActivity"/>
         <activity android:name=".funktionen.RemoveProductActivity"/>
+        <activity android:name=".funktionen.AiRecipesActivity"/>
         <activity android:name=".funktionen.SettingsActivity" />
         <activity android:name=".funktionen.sub.BarcodeScannerActivity" />
 

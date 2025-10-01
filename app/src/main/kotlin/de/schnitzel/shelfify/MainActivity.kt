@@ -38,34 +38,15 @@ class MainActivity : AppCompatActivity() {
         val btnAdd: Button = findViewById(R.id.btnAddProduct)
         val btnRemove: Button = findViewById(R.id.btnRemoveProduct)
         val btnSettings: Button = findViewById(R.id.btnSettings)
+        val btnRecipes: Button = findViewById(R.id.btnRecipes)
         val btnSync: Button = findViewById(R.id.btnSync)
 
         // Klick-Events
-        btnShowAll.setOnClickListener {
-            startActivity(
-                Intent(
-                    this,
-                    ShowAllProductsActivity::class.java
-                )
-            )
-        }
-        btnSearch.setOnClickListener {
-            startActivity(
-                Intent(
-                    this,
-                    ShowAllSpoiledProductsActivity::class.java
-                )
-            )
-        }
+        btnShowAll.setOnClickListener { startActivity(Intent(this, ShowAllProductsActivity::class.java)) }
+        btnSearch.setOnClickListener { startActivity(Intent(this, ShowAllSpoiledProductsActivity::class.java)) }
         btnAdd.setOnClickListener { startActivity(Intent(this, AddProductActivity::class.java)) }
-        btnRemove.setOnClickListener {
-            startActivity(
-                Intent(
-                    this,
-                    RemoveProductActivity::class.java
-                )
-            )
-        }
+        btnRemove.setOnClickListener { startActivity(Intent(this, RemoveProductActivity::class.java)) }
+        btnRecipes.setOnClickListener { startActivity(Intent(this, AiRecipesActivity::class.java)) }
         btnSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
 
         btnSync.setOnClickListener {
