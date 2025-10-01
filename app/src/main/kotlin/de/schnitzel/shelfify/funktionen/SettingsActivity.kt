@@ -180,7 +180,7 @@ class SettingsActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e("loadSett", "Error: $e")
             }
-        }.start()
+        }.start() // Ende Thread
     }
 
     private fun requestVerificationCode(email: String, token: String, prefs: SharedPreferences) {

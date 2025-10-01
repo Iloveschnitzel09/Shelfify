@@ -1,24 +1,18 @@
 package de.schnitzel.shelfify.funktionen
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import de.schnitzel.shelfify.R
-import de.schnitzel.shelfify.api.ApiConfig
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.sub.BarcodeScannerActivity
 import de.schnitzel.shelfify.prefs
-import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.net.HttpURLConnection
-import java.net.URL
 
 class RemoveProductActivity : AppCompatActivity() {
     private lateinit var editTextEan: EditText
@@ -46,7 +40,7 @@ class RemoveProductActivity : AppCompatActivity() {
             barcodeLauncher.launch(intent)
         }
 
-        buttonCheckEan?.setOnClickListener{
+        buttonCheckEan?.setOnClickListener {
             val ean = editTextEan.getText().toString()
             if (!ean.isEmpty()) {
                 removeProduct(ean)
@@ -77,7 +71,11 @@ class RemoveProductActivity : AppCompatActivity() {
                         Toast.makeText(this, "Produkt entfernt", Toast.LENGTH_SHORT).show()
                         editTextEan.text.clear()
                     } else {
-                        Toast.makeText(this, "Produkt nicht gefunden ${response.code}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Produkt nicht gefunden ${response.code}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } catch (e: Exception) {

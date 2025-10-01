@@ -19,4 +19,3 @@ app/src/main/kotlin/de/schnitzel/shelfify/api/ApiConfig.kt
 .idea/copilot.data.migration.ask.xml
 .idea/copilot.data.migration.edit.xml
 .idea/copilot.data.migration.ask2agent.xml
-app/src/main/kotlin/de/schnitzel/shelfify/api/ApiConfig.kt
