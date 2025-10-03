@@ -22,6 +22,7 @@ import de.schnitzel.shelfify.funktionen.sub.DatagroupService.joinGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.leaveGroup
 import de.schnitzel.shelfify.prefs
 import de.schnitzel.shelfify.util.disableButton
+import de.schnitzel.shelfify.util.syncWithServer
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -202,20 +203,29 @@ class SettingsActivity : AppCompatActivity() {
                 val responseCode = conn.responseCode
 
                 runOnUiThread {
-
-                    if (responseCode == 200) {
-                        Toast.makeText(
-                            this,
-                            "Verifizierungscode wurde gesendet",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        loadCurrentSettings(prefs)
-                    } else {
-                        Toast.makeText(
-                            this,
-                            "Fehler beim Senden des Codes$responseCode",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    when (responseCode) {
+                        200 -> {
+                            Toast.makeText(
+                                this,
+                                "Verifizierungscode wurde gesendet",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            loadCurrentSettings(prefs)
+                        }
+                        401 -> {
+                            Toast.makeText(
+                                this,
+                                "Fehlende Daten",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        else -> {
+                            Toast.makeText(
+                                this,
+                                "Fehler beim Senden des Codes$responseCode",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
                 conn.disconnect()
@@ -351,12 +361,13 @@ class SettingsActivity : AppCompatActivity() {
                         200 -> {
                             Toast.makeText(this, "E-Mail-Adresse gespeichert", Toast.LENGTH_SHORT)
                                 .show()
-                            prefs.edit().apply {
+                            prefs.edit {
                                 putString("email", email)
                                 putBoolean("verify", false)
                                 putBoolean("notify", false)
                                 apply()
                             }
+                            syncWithServer(this)
                             loadCurrentSettings(prefs)
                         }
 

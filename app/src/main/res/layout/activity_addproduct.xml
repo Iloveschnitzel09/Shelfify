@@ -3,12 +3,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212"
+    android:layout_marginTop="16dp"
     android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Product Informationen"
+            android:textColor="@color/teal_700"
+            android:textSize="25dp" />
 
         <EditText
             android:id="@+id/etEan"
