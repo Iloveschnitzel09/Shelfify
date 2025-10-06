@@ -32,28 +32,20 @@ object DatagroupService {
 
                 withContext(Dispatchers.Main) {
                     when (code) {
-                        200 -> Toast.makeText(activity, "Beitritt erfolgreich!", Toast.LENGTH_SHORT)
-                            .show()
+                        200 -> Toast.makeText(activity, "Beitritt erfolgreich!", Toast.LENGTH_SHORT).show()
 
-                        400 -> Toast.makeText(activity, "Ungültige Anfrage!", Toast.LENGTH_SHORT)
-                            .show()
+                        400 -> Toast.makeText(activity, "Ungültige Anfrage!", Toast.LENGTH_SHORT).show()
 
-                        401 -> Toast.makeText(activity, "Token ungültig!", Toast.LENGTH_SHORT)
-                            .show()
+                        401 -> Toast.makeText(activity, "Token ungültig!", Toast.LENGTH_SHORT).show()
 
-                        403 -> Toast.makeText(
-                            activity,
-                            "Einladungscode ungültig!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        403 -> Toast.makeText(activity, "Einladungscode ungültig!", Toast.LENGTH_SHORT).show()
 
                         else -> Toast.makeText(activity, "Fehler: $code", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(activity, "Netzwerkfehler: ${e.message}", Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(activity, "Netzwerkfehler: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -6,10 +6,15 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.Patterns
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -22,10 +27,19 @@ import de.schnitzel.shelfify.funktionen.sub.DatagroupService.joinGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.leaveGroup
 import de.schnitzel.shelfify.prefs
 import de.schnitzel.shelfify.util.disableButton
+import de.schnitzel.shelfify.util.syncWithServer
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import de.schnitzel.shelfify.util.adapter.MemberAdapter
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var editTextEmail: EditText
@@ -63,11 +77,52 @@ class SettingsActivity : AppCompatActivity() {
 
         val btnSaveEmail: Button = findViewById(R.id.btnSaveEmail)
 
-        val email = prefs.getString("email", "null") ?: "null"
+        val verifyHeader : TextView = findViewById(R.id.tvVerificationHeader)
+        val verifySection : LinearLayout = findViewById(R.id.verificationSection)
+        val emailHeader : TextView = findViewById(R.id.tvEmailHeader)
+        val emailSection : LinearLayout = findViewById(R.id.emailSection)
+        val notifyHeader: TextView = findViewById(R.id.tvNotificationsHeader)
+        val notifySection: LinearLayout = findViewById(R.id.notificationsSection)
+        val groupHeader: TextView = findViewById(R.id.tvGroupHeader)
+        val groupSection: LinearLayout = findViewById(R.id.groupSection)
+        val memberHeader: TextView = findViewById(R.id.tvMemberHeader)
+        val memberSection: LinearLayout = findViewById(R.id.memberSection)
+
+
+        var email = prefs.getString("email", "null") ?: "null"
         val token = prefs.getString("token", "null") ?: "null"
 
-        // Aktuelle E-Mail-Adresse und Status laden
         loadCurrentSettings(prefs)
+
+        emailHeader.setOnClickListener { emailSection.isVisible = !emailSection.isVisible }
+        verifyHeader.setOnClickListener {
+            if (!prefs.getString("email", "null").equals("null")) {
+                verifySection.isVisible = !verifySection.isVisible
+            } else {
+                Toast.makeText(this, "E-Mail muss erst hinzugefügt werden", Toast.LENGTH_SHORT).show()
+            }
+        }
+        notifyHeader.setOnClickListener {
+            if (prefs.getBoolean("verify", false)) {
+                notifySection.isVisible = !notifySection.isVisible
+            } else {
+                Toast.makeText(this, "E-Mail muss erst verifiziert werden", Toast.LENGTH_SHORT).show()
+            }
+        }
+        groupHeader.setOnClickListener {
+            if (!prefs.getString("email", "null").equals("null")) {
+                groupSection.isVisible = !groupSection.isVisible
+            } else {
+                Toast.makeText(this, "E-Mail muss erst hinzugefügt werden", Toast.LENGTH_SHORT).show()
+            }
+        }
+        memberHeader.setOnClickListener {
+            if (!prefs.getString("email", "null").equals("null")) {
+                memberSection.isVisible = !memberSection.isVisible
+            } else {
+                Toast.makeText(this, "E-Mail muss erst hinzugefügt werden", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         btnSaveEmail.setOnClickListener {
             val etemail = editTextEmail.text.toString().trim()
@@ -80,10 +135,11 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         btnRequestCode.setOnClickListener {
+            email = prefs.getString("email", "null") ?: "null"
             if (email != "null" || token != "null") {
                 requestVerificationCode(email, token, prefs)
             } else {
-                Toast.makeText(this, "Bitte gültige E-Mail-Adresse eingeben", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Bitte gültige E-Mail-Adresse speichern", Toast.LENGTH_SHORT)
                     .show()
             }
         }
@@ -122,6 +178,7 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             inviteGroup(prefs, email, this)
+            etJoinCode.text.clear()
         }
 
         btnJoin.setOnClickListener {
@@ -132,6 +189,7 @@ class SettingsActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             joinGroup(prefs, code, this)
+            etJoinCode.text.clear()
         }
 
         btnLeave.setOnClickListener {
@@ -155,32 +213,31 @@ class SettingsActivity : AppCompatActivity() {
                 if (email != "null") {
                     runOnUiThread { editTextEmail.setText(email) }
                 }
+
                 // Verifizierungsstatus anzeigen
                 val verified = prefs.getBoolean("verify", false)
+                val notify = prefs.getBoolean("notify", false)
                 runOnUiThread {
                     if (verified) {
-                        tvVerificationStatus.text = "Verifiziert"
-                        tvVerificationStatus.setTextColor(Color.GREEN)
                         switchNotifications.isEnabled = true
                         btnVerify.isEnabled = false
                         btnRequestCode.isEnabled = false
+                        editTextVerificationCode.isEnabled = false
                     } else {
-                        tvVerificationStatus.text = "Nicht verifiziert"
-                        tvVerificationStatus.setTextColor(Color.RED)
                         switchNotifications.isEnabled = false
                         btnVerify.isEnabled = true
                         btnRequestCode.isEnabled = true
+                        editTextVerificationCode.isEnabled = true
                     }
+
+                    switchNotifications.isChecked = notify
+                    colorVerifyText(verified)
+                    showMembers()
                 }
-
-                // Notify Status anzeigen
-                val notify = prefs.getBoolean("notify", false)
-                runOnUiThread { switchNotifications.isChecked = notify }
-
             } catch (e: Exception) {
                 Log.e("loadSett", "Error: $e")
             }
-        }.start()
+        }.start() // Ende Thread
     }
 
     private fun requestVerificationCode(email: String, token: String, prefs: SharedPreferences) {
@@ -193,8 +250,7 @@ class SettingsActivity : AppCompatActivity() {
                             "UTF-8"
                         )
                     }&token=$token"
-                )
-                    .openConnection() as HttpURLConnection
+                ).openConnection() as HttpURLConnection
 
                 disableButton(btnRequestCode, "Erneut senden in ", "Code erneut anfordern", 60)
 
@@ -202,20 +258,29 @@ class SettingsActivity : AppCompatActivity() {
                 val responseCode = conn.responseCode
 
                 runOnUiThread {
-
-                    if (responseCode == 200) {
-                        Toast.makeText(
-                            this,
-                            "Verifizierungscode wurde gesendet",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        loadCurrentSettings(prefs)
-                    } else {
-                        Toast.makeText(
-                            this,
-                            "Fehler beim Senden des Codes$responseCode",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    when (responseCode) {
+                        200 -> {
+                            Toast.makeText(
+                                this,
+                                "Verifizierungscode wurde gesendet",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            loadCurrentSettings(prefs)
+                        }
+                        401 -> {
+                            Toast.makeText(
+                                this,
+                                "Fehlende Daten",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        else -> {
+                            Toast.makeText(
+                                this,
+                                "Fehler beim Senden des Codes$responseCode",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
                 conn.disconnect()
@@ -320,16 +385,6 @@ class SettingsActivity : AppCompatActivity() {
                 val id = prefs.getInt("app_id", -1)
                 val token = prefs.getString("token", null)
                 Log.v("test", "$token $id")
-                if (id == -1 || token == null) {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this,
-                            "App-ID oder Token fehlt",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    return@Thread
-                }
 
                 val url = URL("$baseUrl/setEmail")
                 val conn = url.openConnection() as HttpURLConnection
@@ -346,17 +401,18 @@ class SettingsActivity : AppCompatActivity() {
                 }
 
                 val responseCode = conn.responseCode
+                if (responseCode == 200) prefs.edit {
+                    putString("email", email)
+                    putBoolean("verify", false)
+                    putBoolean("notify", false)
+                }
+
                 runOnUiThread {
                     when (responseCode) {
                         200 -> {
                             Toast.makeText(this, "E-Mail-Adresse gespeichert", Toast.LENGTH_SHORT)
                                 .show()
-                            prefs.edit().apply {
-                                putString("email", email)
-                                putBoolean("verify", false)
-                                putBoolean("notify", false)
-                                apply()
-                            }
+                            syncWithServer(this)
                             loadCurrentSettings(prefs)
                         }
 
@@ -377,6 +433,76 @@ class SettingsActivity : AppCompatActivity() {
                 runOnUiThread { Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show() }
             }
         }.start()
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun showMembers() {
+        Thread{
+            val token = prefs.getString("token", "null")
+            val id = prefs.getInt("app_id", -1)
+            val url = "${BASE_URL}/datagroupMembers?id=$id&token=$token"
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .url(url)
+                .build()
+
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful){
+                if (response.body != null) {
+                    val gson = Gson()
+                    val listType = object : TypeToken<List<Map<String, List<String>>>>() {}.type
+                    val data: List<Map<String, List<String>>> = gson.fromJson(response.body?.charStream(), listType)
+
+                    val owner = data.firstOrNull { it.containsKey("owner") }?.get("owner")?.firstOrNull()?.toBoolean() ?: false
+                    val members = data.firstOrNull { it.containsKey("members") }?.get("members") ?: emptyList()
+
+                    runOnUiThread {
+                        val recyclerView : RecyclerView = findViewById(R.id.recyclerViewMembers)
+                        val memberSection = findViewById<LinearLayout>(R.id.memberSection)
+
+                        memberSection.visibility = View.VISIBLE
+                        recyclerView.layoutManager = LinearLayoutManager(this)
+                        recyclerView.adapter = MemberAdapter(members, owner)
+
+                        val header = findViewById<TextView>(R.id.tvMemberHeader)
+                        header.text = "Mitglieder:"
+                    }
+                }
+            } else {
+                runOnUiThread {
+                    Toast.makeText(this, "Fehler beim Laden der Mitglieder", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+    private fun colorVerifyText(verified: Boolean) {
+        val statusText : String
+        val color : Int
+        val start : Int
+        val end : Int
+
+        if(verified) {
+            statusText = "Verifizierungsstatus: Verifiziert"
+            start = statusText.indexOf("Verifiziert")
+            end = start + "Verifiziert".length
+            color = Color.GREEN
+        } else {
+            statusText = "Verifizierungsstatus: Nicht verifiziert"
+             start = statusText.indexOf("Nicht verifiziert")
+            end = start + "Nicht verifiziert".length
+            color = Color.RED
+        }
+        val spannable = SpannableString(statusText)
+
+        spannable.setSpan(
+            ForegroundColorSpan(color),
+            start,
+            end,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        tvVerificationStatus.text = spannable
     }
 
     private fun isValidEmail(email: String): Boolean {

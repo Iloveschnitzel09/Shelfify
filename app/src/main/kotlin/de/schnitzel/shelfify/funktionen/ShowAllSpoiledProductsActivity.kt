@@ -11,7 +11,7 @@ import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig
 import de.schnitzel.shelfify.api.productRequest
 import de.schnitzel.shelfify.prefs
-import de.schnitzel.shelfify.util.ProductAdapter
+import de.schnitzel.shelfify.util.adapter.ProductAdapter
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -21,7 +21,7 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_show_all_spoiled_products)
+        setContentView(R.layout.activity_show_all)
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)

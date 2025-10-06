@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#121212"
+    android:layout_marginTop="16dp"
     android:padding="16dp">
 
     <LinearLayout
@@ -12,230 +14,380 @@
         android:orientation="vertical">
 
         <!-- Abschnitt: E-Mail Einstellungen -->
-        <TextView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="E-Mail für Ablaufbenachrichtigungen"
-            android:textColor="@color/teal_700"
-            android:textSize="18sp" />
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="#1E1E1E"
+            android:layout_marginBottom="16dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/hint_email"
-            android:textColor="@color/teal_100"
-            android:textSize="14sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-        <EditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/teal_200"
-            android:hint="E-Mail-Adresse eingeben"
-            android:importantForAutofill="yes"
-            android:inputType="textEmailAddress"
-            android:textColor="@color/teal_200"
-            android:textColorHint="#AAAAAA" />
+                <TextView
+                    android:id="@+id/tvEmailHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="E-Mail Einstellungen"
+                    android:textColor="@color/teal_700"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
 
-        <Button
-            android:id="@+id/btnSaveEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/teal_200"
-            android:text="E-Mail speichern"
-            android:textColor="@color/teal_700" />
+                <LinearLayout
+                    android:id="@+id/emailSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/hint_email"
+                        android:textColor="@color/teal_100"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/etEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/teal_200"
+                        android:hint="E-Mail-Adresse eingeben"
+                        android:importantForAutofill="yes"
+                        android:inputType="textEmailAddress"
+                        android:textColor="@color/teal_200"
+                        android:textColorHint="#AAAAAA" />
+
+                    <Button
+                        android:id="@+id/btnSaveEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/teal_200"
+                        android:text="E-Mail speichern"
+                        android:textColor="@color/teal_700" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Abschnitt: Verifizierung -->
-        <TextView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Verifizierung"
-            android:textColor="@color/teal_700"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="#1E1E1E"
+            android:layout_marginBottom="16dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/hint_verify"
-            android:textColor="@color/teal_100"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/tvVerificationStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Verifizierungsstatus: Nicht verifiziert"
-            android:textColor="@color/teal_200" />
-
-        <LinearLayout
-            android:id="@+id/verificationContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/etVerificationCode"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="@color/teal_200"
-                android:hint="Verifizierungscode"
-                android:inputType="number"
-                android:maxLength="6"
-                android:textColor="@color/teal_200"
-                android:textColorHint="#AAAAAA" />
+                android:orientation="vertical"
+                android:padding="12dp">
 
-            <Button
-                android:id="@+id/btnVerify"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="@color/teal_200"
-                android:text="Verifizieren"
-                android:textColor="@color/teal_700" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvVerificationHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="Verifizierung"
+                    android:textColor="@color/teal_700"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/btnRequestCode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/teal_200"
-            android:text="Verifizierungscode anfordern"
-            android:textColor="@color/teal_700" />
+                <LinearLayout
+                    android:id="@+id/verificationSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/hint_verify"
+                        android:textColor="@color/teal_100"
+                        android:layout_marginBottom="8dp"
+                        android:textSize="14sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#444444"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:id="@+id/tvVerificationStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Verifizierungsstatus: Nicht verifiziert"
+                        android:textColor="@color/teal_200"/>
+
+                    <LinearLayout
+                        android:id="@+id/verificationContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etVerificationCode"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/teal_200"
+                            android:hint="Verifizierungscode"
+                            android:inputType="number"
+                            android:maxLength="6"
+                            android:textColor="@color/teal_200"
+                            android:textColorHint="#AAAAAA" />
+
+                        <Button
+                            android:id="@+id/btnVerify"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:backgroundTint="@color/teal_200"
+                            android:text="Verifizieren"
+                            android:textColor="@color/teal_700" />
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btnRequestCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:backgroundTint="@color/teal_200"
+                        android:text="Verifizierungscode anfordern"
+                        android:textColor="@color/teal_700" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Abschnitt: Benachrichtigungen -->
-        <TextView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Benachrichtigungen"
-            android:textColor="@color/teal_700"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="#1E1E1E"
+            android:layout_marginBottom="16dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Aktivieren Sie wöchentliche Benachrichtigungen, um einen Überblick über Ihre bald ablaufenden Lebensmittel zu erhalten."
-            android:textColor="@color/teal_100"
-            android:textSize="14sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-        <Switch
-            android:id="@+id/switchNotifications"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:enabled="false"
-            android:text="Benachrichtigungen immer Montags um 7Uhr"
-            android:textColor="@color/teal_200"
-            android:textSize="16sp"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
-      
+                <TextView
+                    android:id="@+id/tvNotificationsHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="Benachrichtigungen"
+                    android:textColor="@color/teal_700"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/notificationsSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Aktivieren Sie wöchentliche Benachrichtigungen, um einen Überblick über Ihre bald ablaufenden Lebensmittel zu erhalten."
+                        android:textColor="@color/teal_100"
+                        android:textSize="14sp" />
+
+                    <Switch
+                        android:id="@+id/switchNotifications"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:text="Benachrichtigungen immer Montags um 7Uhr"
+                        android:textColor="@color/teal_200"
+                        android:textSize="16sp"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Abschnitt: Gruppenverwaltung -->
-        <TextView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Gruppenverwaltung"
-            android:textColor="@color/teal_700"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="#1E1E1E"
+            android:layout_marginBottom="16dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/hint_datagroup_0"
-            android:textColor="@color/teal_100"
-            android:textSize="14sp" />
-
-        <LinearLayout
-            android:id="@+id/datagoupContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/etInviteEmail"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="@color/teal_200"
-                android:hint="Email zum einladen"
-                android:importantForAutofill="no"
-                android:inputType="textEmailAddress"
-                android:textColor="@color/teal_200"
-                android:textColorHint="#AAAAAA" />
+                android:orientation="vertical"
+                android:padding="12dp">
 
-            <Button
-                android:id="@+id/btnInvite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="@color/teal_200"
-                android:text=" einladen "
-                android:textColor="@color/teal_700" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvGroupHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="Gruppenverwaltung"
+                    android:textColor="@color/teal_700"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-        <LinearLayout
-            android:id="@+id/datagoupJoinContainer"
+                <LinearLayout
+                    android:id="@+id/groupSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:paddingTop="8dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/hint_datagroup_0"
+                        android:textColor="@color/teal_100"
+                        android:textSize="14sp" />
+
+                    <LinearLayout
+                        android:id="@+id/datagoupContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etInviteEmail"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/teal_200"
+                            android:hint="Email zum einladen"
+                            android:importantForAutofill="no"
+                            android:inputType="textEmailAddress"
+                            android:textColor="@color/teal_200"
+                            android:textColorHint="#AAAAAA" />
+
+                        <Button
+                            android:id="@+id/btnInvite"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:backgroundTint="@color/teal_200"
+                            android:text=" einladen "
+                            android:textColor="@color/teal_700" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/datagoupJoinContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etJoinCode"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/teal_200"
+                            android:hint="Code zum beitereten"
+                            android:importantForAutofill="no"
+                            android:inputType="textEmailAddress"
+                            android:textColor="@color/teal_200"
+                            android:textColorHint="#AAAAAA" />
+
+                        <Button
+                            android:id="@+id/btnJoin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:backgroundTint="@color/teal_200"
+                            android:text="beitreten"
+                            android:textColor="@color/teal_700" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/hint_datagroup_1"
+                        android:textColor="@color/teal_100"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/btnLeave"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/teal_200"
+                        android:text="Gruppe verlassen"
+                        android:textColor="@color/teal_700" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Abschnitt: Gruppenmitglieder -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="#1E1E1E"
+            android:layout_marginBottom="16dp">
 
-            <EditText
-                android:id="@+id/etJoinCode"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="@color/teal_200"
-                android:hint="Code zum beitereten"
-                android:importantForAutofill="no"
-                android:inputType="textEmailAddress"
-                android:textColor="@color/teal_200"
-                android:textColorHint="#AAAAAA" />
+                android:orientation="vertical"
+                android:padding="12dp">
 
-            <Button
-                android:id="@+id/btnJoin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="@color/teal_200"
-                android:text="beitreten"
-                android:textColor="@color/teal_700" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvMemberHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="Gruppenmitglieder"
+                    android:textColor="@color/teal_700"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/hint_datagroup_1"
-            android:textColor="@color/teal_100"
-            android:textSize="14sp" />
+                <LinearLayout
+                    android:id="@+id/memberSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:paddingTop="8dp">
 
-        <Button
-            android:id="@+id/btnLeave"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/teal_200"
-            android:text="Gruppe verlassen"
-            android:textColor="@color/teal_700" />
-      
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewMembers"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
-
-
 </ScrollView>
