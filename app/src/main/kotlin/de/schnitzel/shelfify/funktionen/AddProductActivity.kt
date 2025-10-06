@@ -34,6 +34,7 @@ class AddProductActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK && result.data != null) {
                 val ean = result.data?.getStringExtra("ean")
                 editTextEan.setText(ean)
+                checkEan(ean.toString())
             }
         }
 
@@ -48,7 +49,7 @@ class AddProductActivity : AppCompatActivity() {
         editTextEan = findViewById(R.id.etEan)
         editTextProductName = findViewById(R.id.etName)
         editTextDate = findViewById(R.id.etDate)
-        val buttonCheckEan = findViewById<Button>(R.id.btnCheckEan)
+//        val buttonCheckEan = findViewById<Button>(R.id.btnCheckEan)
         val buttonAddProduct = findViewById<Button>(R.id.btnAddProduct)
 
         editTextDate.setOnClickListener { openCustomDatePicker() }
@@ -56,15 +57,19 @@ class AddProductActivity : AppCompatActivity() {
             barcodeLauncher.launch(intent)
         }
 
-
-        buttonCheckEan.setOnClickListener {
-            val ean = editTextEan.text.toString()
-            if (ean.isNotEmpty()) {
-                checkEan(ean)
-            } else {
-                Toast.makeText(this, "Bitte EAN eingeben", Toast.LENGTH_SHORT).show()
-            }
+        editTextEan.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
+            if (hasFocus)
+            barcodeLauncher.launch(intent)
         }
+
+//        buttonCheckEan.setOnClickListener {
+//            val ean = editTextEan.text.toString()
+//            if (ean.isNotEmpty()) {
+//                checkEan(ean)
+//            } else {
+//                Toast.makeText(this, "Bitte EAN eingeben", Toast.LENGTH_SHORT).show()
+//            }
+//        }
 
         buttonAddProduct.setOnClickListener {
             val ean = editTextEan.text.toString()
@@ -157,13 +162,13 @@ class AddProductActivity : AppCompatActivity() {
 
                     runOnUiThread {
                         editTextProductName.setText(name)
-                        editTextProductName.visibility = View.GONE
+//                        editTextProductName.visibility = View.GONE
                         Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
                         addEan = false
                     }
                 } else {
                     runOnUiThread {
-                        editTextProductName.visibility = View.VISIBLE
+//                        editTextProductName.visibility = View.VISIBLE
                         Toast.makeText(
                             this,
                             "Produktname nicht gefunden – bitte eingeben",
@@ -237,7 +242,7 @@ class AddProductActivity : AppCompatActivity() {
                             editTextEan.text.clear()
                             editTextProductName.text.clear()
                             editTextDate.text.clear()
-                            editTextProductName.visibility = View.GONE
+//                            editTextProductName.visibility = View.GONE
                         }
 
                         409 -> Toast.makeText(

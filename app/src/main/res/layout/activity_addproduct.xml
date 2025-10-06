@@ -30,14 +30,15 @@
             android:backgroundTint="@color/teal_200"
             android:layout_marginBottom="12dp"/>
 
-        <Button
-            android:id="@+id/btnCheckEan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="EAN prüfen"
-            android:backgroundTint="@color/teal_200"
-            android:textColor="@color/teal_700"
-            android:layout_marginBottom="24dp" />
+<!--        <Button-->
+<!--            android:id="@+id/btnCheckEan"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="EAN prüfen"-->
+<!--            android:backgroundTint="@color/teal_200"-->
+<!--            android:textColor="@color/teal_700"-->
+<!--            android:layout_marginBottom="24dp" /
+android:visibility="gone">-->
 
         <EditText
             android:id="@+id/etName"
@@ -47,8 +48,7 @@
             android:textColor="@color/teal_200"
             android:textColorHint="#AAAAAA"
             android:backgroundTint="@color/teal_200"
-            android:layout_marginBottom="12dp"
-            android:visibility="gone"/>
+            android:layout_marginBottom="12dp" />
 
         <EditText
             android:id="@+id/etDate"

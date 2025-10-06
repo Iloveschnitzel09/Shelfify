@@ -2,6 +2,7 @@ package de.schnitzel.shelfify.funktionen
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -38,6 +39,11 @@ class RemoveProductActivity : AppCompatActivity() {
 
         editTextEan.setOnClickListener {
             barcodeLauncher.launch(intent)
+        }
+
+        editTextEan.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
+            if (hasFocus)
+                barcodeLauncher.launch(intent)
         }
 
         buttonCheckEan?.setOnClickListener {
