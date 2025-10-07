@@ -82,18 +82,22 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
         }.start()
 
         btnSearch.setOnClickListener {
+            val prolist : MutableList<Products> = mutableListOf()
             val searchTerm = etSearch.text.toString().lowercase()
             for (product in products ?: emptyList()) {
                 if (product.produktname.lowercase().contains(searchTerm)) {
-                    val index = products?.indexOf(product) ?: -1
-                    Log.e("SEARCH", "Index: $index")
-                    if (index != -1) {
-                        recyclerView.smoothScrollToPosition(index)
-                        return@setOnClickListener
-                    }
+                    prolist.add(product)
                 }
             }
-            Toast.makeText(this, "Produkt nicht gefunden!", Toast.LENGTH_SHORT).show()
+
+            if (prolist.isEmpty()) {
+                Toast.makeText(this, "Produkt nicht gefunden!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val data = ProductAdapter(prolist)
+            runOnUiThread {
+                recyclerView.adapter = data
+            }
         }
     }
 }

@@ -198,6 +198,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setMessage("Bist du sicher, dass du die Datengruppe verlassen möchtest?")
                 .setPositiveButton("Ja") { _, _ ->
                     leaveGroup(prefs, this)
+                    showMembers()
                 }
                 .setNegativeButton("Abbrechen", null)
                 .show()
