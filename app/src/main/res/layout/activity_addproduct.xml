@@ -30,16 +30,6 @@
             android:backgroundTint="@color/teal_200"
             android:layout_marginBottom="12dp"/>
 
-<!--        <Button-->
-<!--            android:id="@+id/btnCheckEan"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="EAN prüfen"-->
-<!--            android:backgroundTint="@color/teal_200"-->
-<!--            android:textColor="@color/teal_700"-->
-<!--            android:layout_marginBottom="24dp" /
-android:visibility="gone">-->
-
         <EditText
             android:id="@+id/etName"
             android:layout_width="match_parent"
@@ -56,11 +46,24 @@ android:visibility="gone">-->
             android:layout_height="wrap_content"
             android:hint="Ablaufdatum auswählen"
             android:focusable="false"
-            android:clickable="true"
             android:textColor="@color/teal_200"
             android:textColorHint="#AAAAAA"
             android:backgroundTint="@color/teal_200"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/teal_200"
+            android:hint="Menge (Optional)"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            android:textColor="@color/teal_200"
+            android:textColorHint="#AAAAAA"
+            android:layout_marginBottom="24dp"/>
+
 
         <Button
             android:id="@+id/btnAddProduct"

@@ -54,7 +54,8 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
 
         builder.setNegativeButton(
             "Abbrechen",
-            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int -> dialog!!.cancel() })
+            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int -> dialog!!.cancel() }
+        )
 
         builder.show()
     }
