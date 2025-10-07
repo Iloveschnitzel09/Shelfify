@@ -9,7 +9,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
 
-fun productRequest(request: Request, client: OkHttpClient): ProductAdapter? {
+fun productRequest(request: Request, client: OkHttpClient): List<Products>? {
     try {
         val response = client.newCall(request).execute()
         if (response.isSuccessful) {
@@ -17,7 +17,7 @@ fun productRequest(request: Request, client: OkHttpClient): ProductAdapter? {
             val listType = object : TypeToken<List<Products>>() {}.type
             val products = Gson().fromJson<List<Products>>(jsonResponse, listType)
             Log.e("PR", "Es wurden ${products?.size ?: "null"} Produkte geladen.")
-            return ProductAdapter(products ?: emptyList())
+            return products
         } else {
             Log.e("PR", "Anfragen fehler. ${response.code}")
             return null
