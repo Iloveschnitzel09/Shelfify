@@ -35,7 +35,7 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
         val btnSearch: Button = findViewById(R.id.btnSearch)
 
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Zeitraum auswählen")
+        builder.setTitle("Wie viele Tage im voraus?")
 
         val numberPicker = NumberPicker(this)
         numberPicker.minValue = 1

@@ -81,32 +81,6 @@ class AddProductActivity : AppCompatActivity() {
         }
     }
 
-    private fun setQuantity() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Menge auswählen")
-
-        val numberPicker = NumberPicker(this)
-        numberPicker.minValue = 1
-        numberPicker.maxValue = 365
-        numberPicker.value = 1
-        numberPicker.setBackgroundColor(121212)
-
-        builder.setView(numberPicker)
-
-        builder.setPositiveButton(
-            "OK",
-            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
-                selectedQuantity = numberPicker.value
-            })
-
-        builder.setNegativeButton(
-            "Abbrechen",
-            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int -> dialog!!.cancel() }
-        )
-
-        builder.show()
-    }
-
     private fun openCustomDatePicker() {
         val calendar = Calendar.getInstance()
         val currentYear = calendar.get(Calendar.YEAR)
