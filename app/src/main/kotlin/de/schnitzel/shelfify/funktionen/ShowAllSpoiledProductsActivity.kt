@@ -35,7 +35,7 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
         val btnSearch: Button = findViewById(R.id.btnSearch)
 
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Zeitraum auswählen")
+        builder.setTitle("Wie viele Tage im voraus?")
 
         val numberPicker = NumberPicker(this)
         numberPicker.minValue = 1
@@ -54,7 +54,8 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
 
         builder.setNegativeButton(
             "Abbrechen",
-            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int -> dialog!!.cancel() })
+            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int -> dialog!!.cancel() }
+        )
 
         builder.show()
     }

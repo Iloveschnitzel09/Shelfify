@@ -1,6 +1,7 @@
 package de.schnitzel.shelfify.funktionen
 
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
@@ -27,6 +28,8 @@ class AddProductActivity : AppCompatActivity() {
     private lateinit var editTextEan: EditText
     private lateinit var editTextProductName: EditText
     private lateinit var editTextDate: EditText
+    private lateinit var etQuantity : EditText
+    private var selectedQuantity = 1
     private var addEan = false
 
     private var barcodeLauncher =
@@ -49,7 +52,7 @@ class AddProductActivity : AppCompatActivity() {
         editTextEan = findViewById(R.id.etEan)
         editTextProductName = findViewById(R.id.etName)
         editTextDate = findViewById(R.id.etDate)
-//        val buttonCheckEan = findViewById<Button>(R.id.btnCheckEan)
+        etQuantity = findViewById(R.id.etQuantity)
         val buttonAddProduct = findViewById<Button>(R.id.btnAddProduct)
 
         editTextDate.setOnClickListener { openCustomDatePicker() }
@@ -58,30 +61,23 @@ class AddProductActivity : AppCompatActivity() {
         }
 
         editTextEan.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
-            if (hasFocus)
-            barcodeLauncher.launch(intent)
+            if (hasFocus) barcodeLauncher.launch(intent)
         }
-
-//        buttonCheckEan.setOnClickListener {
-//            val ean = editTextEan.text.toString()
-//            if (ean.isNotEmpty()) {
-//                checkEan(ean)
-//            } else {
-//                Toast.makeText(this, "Bitte EAN eingeben", Toast.LENGTH_SHORT).show()
-//            }
-//        }
 
         buttonAddProduct.setOnClickListener {
             val ean = editTextEan.text.toString()
             val name = editTextProductName.text.toString()
             val datum = editTextDate.text.toString()
+            var quantity = etQuantity.text.toString()
+            if (quantity.isEmpty()) quantity = "1"
+
 
             if (ean.isEmpty() || datum.isEmpty() || name.isEmpty()) {
                 Toast.makeText(this, "Alle Felder ausfüllen", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            addNewProduct(ean, name, datum, addEan)
+            addNewProduct(ean, name, datum, addEan, quantity)
         }
     }
 
@@ -162,13 +158,12 @@ class AddProductActivity : AppCompatActivity() {
 
                     runOnUiThread {
                         editTextProductName.setText(name)
-//                        editTextProductName.visibility = View.GONE
                         Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
+                        editTextProductName.isEnabled = false
                         addEan = false
                     }
                 } else {
                     runOnUiThread {
-//                        editTextProductName.visibility = View.VISIBLE
                         Toast.makeText(
                             this,
                             "Produktname nicht gefunden – bitte eingeben",
@@ -185,7 +180,7 @@ class AddProductActivity : AppCompatActivity() {
         }.start()
     }
 
-    private fun addNewProduct(ean: String, name: String, datum: String, add: Boolean) {
+    private fun addNewProduct(ean: String, name: String, datum: String, add: Boolean, quantity: String) {
         Thread {
             try {
                 val token = prefs.getString("token", "null")
@@ -222,6 +217,7 @@ class AddProductActivity : AppCompatActivity() {
                     .add("ablaufdatum", datum)
                     .add("id", id.toString())
                     .add("token", token ?: "")
+                    .add("quantity", quantity)
                     .build()
 
                 val addProductRequest = Request.Builder()

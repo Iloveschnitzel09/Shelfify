@@ -17,12 +17,15 @@ import okhttp3.Request
 
 class RemoveProductActivity : AppCompatActivity() {
     private lateinit var editTextEan: EditText
+    private lateinit var editTextName: EditText
+    private lateinit var editTextQuantity: EditText
 
     private var barcodeLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK && result.data != null) {
-                val ean = result.data?.getStringExtra("ean")
+                val ean = result.data?.getStringExtra("ean") ?: "null"
                 editTextEan.setText(ean)
+                if(ean != "null") getProName(ean)
             }
         }
 
@@ -35,7 +38,9 @@ class RemoveProductActivity : AppCompatActivity() {
         setContentView(R.layout.activity_removeproduct)
 
         editTextEan = findViewById(R.id.etEan)
-        val buttonCheckEan = findViewById<Button?>(R.id.btnCheckEan)
+        editTextName = findViewById(R.id.etName)
+        editTextQuantity = findViewById(R.id.etQuantity)
+        val buttonCheckEan = findViewById<Button>(R.id.btnCheckEan)
 
         editTextEan.setOnClickListener {
             barcodeLauncher.launch(intent)
@@ -46,24 +51,59 @@ class RemoveProductActivity : AppCompatActivity() {
                 barcodeLauncher.launch(intent)
         }
 
-        buttonCheckEan?.setOnClickListener {
+        buttonCheckEan.setOnClickListener {
             val ean = editTextEan.getText().toString()
+            val quantity= editTextQuantity.text.toString()
             if (!ean.isEmpty()) {
-                removeProduct(ean)
+                removeProduct(ean, quantity)
             } else {
                 Toast.makeText(this, "Bitte EAN eingeben", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun removeProduct(ean: String) {
+    private fun getProName(ean: String) {
+        Thread {
+            try {
+                val token = prefs.getString("token", "null")
+                val id = prefs.getInt("app_id", -1)
+                val url = "${BASE_URL}/lookupProductName?ean=$ean&id=$id&token=$token"
+
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url(url)
+                    .build()
+
+                val response = client.newCall(request).execute()
+
+                if (response.isSuccessful) {
+                    val name = response.body?.string() ?: ""
+                    runOnUiThread {
+                        editTextName.setText(name)
+                        Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
+                        editTextName.isEnabled = false
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(this, "Produktname nicht gefunden – bitte eingeben", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this, "Fehler beim Abrufen", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+
+    private fun removeProduct(ean: String, quantity: String) {
         Thread {
             try {
                 val token = prefs.getString("token", "null")
                 val id = prefs.getInt("app_id", -1)
                 val client = OkHttpClient()
 
-                val url = "$BASE_URL/removeProduct?ean=$ean&id=$id&token=$token"
+                val url = "$BASE_URL/removeProduct?ean=$ean&id=$id&token=$token&quantity=$quantity"
 
                 val removeRequest = Request.Builder()
                     .url(url)
