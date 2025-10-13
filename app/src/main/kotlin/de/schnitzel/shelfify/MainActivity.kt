@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import de.schnitzel.shelfify.api.ApiConfig
+import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.AddProductActivity
 import de.schnitzel.shelfify.funktionen.AiRecipesActivity
 import de.schnitzel.shelfify.funktionen.RemoveProductActivity
@@ -16,6 +17,9 @@ import de.schnitzel.shelfify.funktionen.ShowAllProductsActivity
 import de.schnitzel.shelfify.funktionen.ShowAllSpoiledProductsActivity
 import de.schnitzel.shelfify.util.disableButton
 import de.schnitzel.shelfify.util.syncWithServer
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -31,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
 
         // App-Synchronisation beim Start
-        syncWithServer(this)
+        syncWithServer()
 
         // Buttons aus Layout
         val btnShowAll: Button = findViewById(R.id.btnShowAllProducts)
@@ -73,44 +77,7 @@ class MainActivity : AppCompatActivity() {
 
         btnSync.setOnClickListener {
             disableButton(btnSync, null, "↻", 5)
-            syncWithServer(this)
+            syncWithServer()
         }
-    }
-
-    private fun delete() {
-        Thread {
-            try {
-                val token = prefs.getString("token", "null")
-                val id = prefs.getInt("app_id", -1)
-
-                val url = URL("${ApiConfig.BASE_URL}/deleteAcc")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-
-                val postData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    "id=${URLEncoder.encode(id.toString(), StandardCharsets.UTF_8)}&token=$token"
-                } else null
-
-                conn.outputStream.use { os ->
-                    postData?.let { os.write(it.toByteArray(StandardCharsets.UTF_8)) }
-                }
-
-                val responseCode = conn.responseCode
-                runOnUiThread {
-                    if (responseCode == 200) {
-                        Toast.makeText(this, "Daten gelöscht", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Fehler beim Löschen", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                conn.disconnect()
-            } catch (e: Exception) {
-                runOnUiThread {
-                    Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }.start()
     }
 }

@@ -2,6 +2,7 @@ package de.schnitzel.shelfify.funktionen
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
@@ -38,10 +39,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import de.schnitzel.shelfify.util.adapter.MemberAdapter
+import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
 class SettingsActivity : AppCompatActivity() {
+
+    val client = OkHttpClient()
     private lateinit var editTextEmail: EditText
     private lateinit var editTextVerificationCode: EditText
     private lateinit var tvVerificationStatus: TextView
@@ -55,7 +59,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnJoin: Button
     private lateinit var btnLeave: Button
     private lateinit var etInviteEmail: EditText
-    private val baseUrl: String = BASE_URL
+    private lateinit var  btnDeleteData : Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +78,7 @@ class SettingsActivity : AppCompatActivity() {
         etJoinCode = findViewById(R.id.etJoinCode)
         btnJoin = findViewById(R.id.btnJoin)
         btnLeave = findViewById(R.id.btnLeave)
+        btnDeleteData = findViewById(R.id.btnDelete)
 
         val btnSaveEmail: Button = findViewById(R.id.btnSaveEmail)
 
@@ -87,12 +92,14 @@ class SettingsActivity : AppCompatActivity() {
         val groupSection: LinearLayout = findViewById(R.id.groupSection)
         val memberHeader: TextView = findViewById(R.id.tvMemberHeader)
         val memberSection: LinearLayout = findViewById(R.id.memberSection)
+        val deleteHeader: TextView = findViewById(R.id.tvDeleteHeader)
+        val deleteSection: LinearLayout = findViewById(R.id.deleteSection)
 
 
         var email = prefs.getString("email", "null") ?: "null"
         val token = prefs.getString("token", "null") ?: "null"
 
-        loadCurrentSettings(prefs)
+        loadCurrentSettings()
 
         emailHeader.setOnClickListener { emailSection.isVisible = !emailSection.isVisible }
         verifyHeader.setOnClickListener {
@@ -118,10 +125,14 @@ class SettingsActivity : AppCompatActivity() {
         }
         memberHeader.setOnClickListener {
             if (!prefs.getString("email", "null").equals("null")) {
+                showMembers()
                 memberSection.isVisible = !memberSection.isVisible
             } else {
                 Toast.makeText(this, "E-Mail muss erst hinzugefügt werden", Toast.LENGTH_SHORT).show()
             }
+        }
+        deleteHeader.setOnClickListener {
+            deleteSection.isVisible = !deleteSection.isVisible
         }
 
         btnSaveEmail.setOnClickListener {
@@ -203,16 +214,22 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton("Abbrechen", null)
                 .show()
         }
+
+        btnDeleteData.setOnClickListener {
+            deleteConfirmation()
+        }
     }
 
     @SuppressLint("SetTextI18n")
-    private fun loadCurrentSettings(prefs: SharedPreferences) {
+    private fun loadCurrentSettings() {
         Thread {
             try {
                 // Email anzeigen
                 val email = prefs.getString("email", "null") ?: "null"
                 if (email != "null") {
                     runOnUiThread { editTextEmail.setText(email) }
+                } else {
+                    runOnUiThread { editTextEmail.text.clear() }
                 }
 
                 // Verifizierungsstatus anzeigen
@@ -233,7 +250,6 @@ class SettingsActivity : AppCompatActivity() {
 
                     switchNotifications.isChecked = notify
                     colorVerifyText(verified)
-                    showMembers()
                 }
             } catch (e: Exception) {
                 Log.e("loadSett", "Error: $e")
@@ -266,7 +282,7 @@ class SettingsActivity : AppCompatActivity() {
                                 "Verifizierungscode wurde gesendet",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            loadCurrentSettings(prefs)
+                            loadCurrentSettings()
                         }
                         401 -> {
                             Toast.makeText(
@@ -295,7 +311,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun verifyCode(email: String, code: String, token: String, prefs: SharedPreferences) {
         Thread {
             try {
-                val url = URL("$baseUrl/verifyCode")
+                val url = URL("$BASE_URL/verifyCode")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.doOutput = true
@@ -317,7 +333,7 @@ class SettingsActivity : AppCompatActivity() {
                         Toast.makeText(this, "E-Mail erfolgreich verifiziert", Toast.LENGTH_SHORT)
                             .show()
                         prefs.edit { putBoolean("verify", true) }
-                        loadCurrentSettings(prefs)
+                        loadCurrentSettings()
                     } else {
                         Toast.makeText(this, "Ungültiger Code", Toast.LENGTH_SHORT).show()
                     }
@@ -337,7 +353,7 @@ class SettingsActivity : AppCompatActivity() {
     ) {
         Thread {
             try {
-                val url = URL("$baseUrl/setNotifyPreference")
+                val url = URL("$BASE_URL/setNotifyPreference")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.doOutput = true
@@ -385,36 +401,33 @@ class SettingsActivity : AppCompatActivity() {
             try {
                 val id = prefs.getInt("app_id", -1)
                 val token = prefs.getString("token", null)
-                Log.v("test", "$token $id")
 
-                val url = URL("$baseUrl/setEmail")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                val formBody = FormBody.Builder()
+                    .add("email", email)
+                    .add("id", id.toString())
+                    .add("token", token ?: "")
+                    .build()
 
-                val postData = "email=${URLEncoder.encode(email, "UTF-8")}" +
-                        "&id=$id" +
-                        "&token=${URLEncoder.encode(token, "UTF-8")}"
+                val request = Request.Builder()
+                    .url("$BASE_URL/setEmail")
+                    .post(formBody)
+                    .build()
 
-                conn.outputStream.use { os ->
-                    os.write(postData.toByteArray(StandardCharsets.UTF_8))
-                }
+                val response =  client.newCall(request).execute()
 
-                val responseCode = conn.responseCode
-                if (responseCode == 200) prefs.edit {
+                if (response.isSuccessful) prefs.edit {
                     putString("email", email)
                     putBoolean("verify", false)
                     putBoolean("notify", false)
                 }
 
                 runOnUiThread {
-                    when (responseCode) {
+                    when (response.code) {
                         200 -> {
                             Toast.makeText(this, "E-Mail-Adresse gespeichert", Toast.LENGTH_SHORT)
                                 .show()
-                            syncWithServer(this)
-                            loadCurrentSettings(prefs)
+                            syncWithServer()
+                            loadCurrentSettings()
                         }
 
                         409 -> Toast.makeText(
@@ -428,8 +441,6 @@ class SettingsActivity : AppCompatActivity() {
                             .show()
                     }
                 }
-
-                conn.disconnect()
             } catch (e: Exception) {
                 runOnUiThread { Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show() }
             }
@@ -443,7 +454,6 @@ class SettingsActivity : AppCompatActivity() {
             val id = prefs.getInt("app_id", -1)
             val url = "${BASE_URL}/datagroupMembers?id=$id&token=$token"
 
-            val client = OkHttpClient()
             val request = Request.Builder()
                 .url(url)
                 .build()
@@ -460,9 +470,7 @@ class SettingsActivity : AppCompatActivity() {
 
                     runOnUiThread {
                         val recyclerView : RecyclerView = findViewById(R.id.recyclerViewMembers)
-                        val memberSection = findViewById<LinearLayout>(R.id.memberSection)
 
-                        memberSection.visibility = View.VISIBLE
                         recyclerView.layoutManager = LinearLayoutManager(this)
                         recyclerView.adapter = MemberAdapter(members, owner)
 
@@ -504,6 +512,71 @@ class SettingsActivity : AppCompatActivity() {
         )
 
         tvVerificationStatus.text = spannable
+    }
+
+    private fun deleteConfirmation() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Daten löschen")
+        builder.setMessage("Möchtest du deine Daten wirklich entgültig löschen?")
+
+        builder.setPositiveButton(
+            "OK",
+            DialogInterface.OnClickListener {
+                dialog: DialogInterface?, which: Int ->
+                delete()
+            }
+        )
+
+        builder.setNegativeButton("Abbrechen",
+            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
+                dialog!!.cancel()
+            }
+        )
+
+        builder.show()
+    }
+
+    private fun delete() {
+        Thread {
+            try {
+                val token = prefs.getString("token", "null")
+                val id = prefs.getInt("app_id", -1)
+                val client = OkHttpClient()
+
+                val formBody = FormBody.Builder()
+                    .add("id", id.toString())
+                    .add("token", token ?: "")
+                    .build()
+
+                val request = Request.Builder()
+                    .url("$BASE_URL/deleteAcc")
+                    .post(formBody)
+                    .build()
+
+                val response =  client.newCall(request).execute()
+
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this, "Daten gelöscht", Toast.LENGTH_SHORT).show()
+                        prefs.edit {
+                            putString("token", null)
+                            putInt("app_id", -1)
+                            putString("email", null)
+                            apply()
+                        }
+                        syncWithServer {
+                            loadCurrentSettings()
+                        }
+                    } else {
+                        Toast.makeText(this, "Fehler beim Löschen", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
     }
 
     private fun isValidEmail(email: String): Boolean {

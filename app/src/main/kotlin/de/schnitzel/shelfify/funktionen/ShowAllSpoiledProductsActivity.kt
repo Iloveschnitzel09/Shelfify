@@ -3,7 +3,6 @@ package de.schnitzel.shelfify.funktionen
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.NumberPicker
@@ -22,7 +21,6 @@ import okhttp3.Request
 
 class ShowAllSpoiledProductsActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var productAdapter: ProductAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
