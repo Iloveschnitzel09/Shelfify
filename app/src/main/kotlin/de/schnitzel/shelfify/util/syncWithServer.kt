@@ -5,14 +5,14 @@ import android.util.Log
 import androidx.core.content.edit
 import com.android.identity.util.UUID
 import de.schnitzel.shelfify.api.ApiConfig
+import de.schnitzel.shelfify.prefs
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
-fun syncWithServer(context: Context) {
-    val prefs = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+fun syncWithServer(onComplete: (() -> Unit)? = null) {
     Thread {
         try {
             val savedId = prefs.getInt("app_id", -1)
@@ -71,6 +71,8 @@ fun syncWithServer(context: Context) {
                     prefs.edit { putBoolean("verify", verify) }
                     Log.e("sync", "Verify geändert: $verify")
                 }
+
+                onComplete?.invoke()
             } else {
                 Log.e("Sync", "Fehler beim Sync: Code $code")
             }
