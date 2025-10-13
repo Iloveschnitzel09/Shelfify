@@ -518,12 +518,23 @@ class SettingsActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Daten löschen")
         builder.setMessage("Möchtest du deine Daten wirklich entgültig löschen?")
+        var pos = false
 
         builder.setPositiveButton(
+
             "OK",
             DialogInterface.OnClickListener {
                 dialog: DialogInterface?, which: Int ->
-                delete()
+                if(pos){
+                    pos = false
+
+                    delete()
+                } else {
+                    builder.setMessage("Wirklich sicher?")
+                    builder.show()
+                    pos = true
+                }
+
             }
         )
 
