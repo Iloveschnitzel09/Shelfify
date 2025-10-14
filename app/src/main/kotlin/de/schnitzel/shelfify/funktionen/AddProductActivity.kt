@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -38,6 +39,9 @@ class AddProductActivity : AppCompatActivity() {
                 val ean = result.data?.getStringExtra("ean")
                 editTextEan.setText(ean)
                 checkEan(ean.toString())
+                editTextProductName.isEnabled = false
+            } else {
+                editTextProductName.isEnabled = true
             }
         }
 
@@ -164,11 +168,13 @@ class AddProductActivity : AppCompatActivity() {
                     }
                 } else {
                     runOnUiThread {
-                        Toast.makeText(
-                            this,
-                            "Produktname nicht gefunden – bitte eingeben",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Log.e("ap", response.body?.string() ?: "leer")
+                        when (response.code) {
+                            404 -> Toast.makeText(this, "Produktname nicht gefunden – bitte eingeben", Toast.LENGTH_SHORT).show()
+                            502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                            else -> Toast.makeText(this, "Unerwarteter Fehler: ${response.code}", Toast.LENGTH_SHORT).show()
+                        }
+                        editTextProductName.isEnabled = true
                         addEan = true
                     }
                 }
@@ -202,13 +208,20 @@ class AddProductActivity : AppCompatActivity() {
 
                     val response = client.newCall(eanRequest).execute()
 
-                    if (!response.isSuccessful && response.code != 409) {
+                    if (!response.isSuccessful) {
                         runOnUiThread {
-                            Toast.makeText(this, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT)
-                                .show()
+                            when (response.code) {
+                                400 -> Toast.makeText(this, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT).show()
+                                409 -> Toast.makeText(this, "Name schon vorhanden", Toast.LENGTH_SHORT).show()
+                                502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                                else -> Toast.makeText(this, "Unerwarteter Fehler: ${response.code}", Toast.LENGTH_SHORT).show()
+                            }
                         }
+
                         return@Thread
                     }
+
+
                     response.close()
                 }
 

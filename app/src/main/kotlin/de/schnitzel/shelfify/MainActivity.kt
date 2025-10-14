@@ -2,13 +2,9 @@ package de.schnitzel.shelfify
 
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import de.schnitzel.shelfify.api.ApiConfig
-import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.AddProductActivity
 import de.schnitzel.shelfify.funktionen.AiRecipesActivity
 import de.schnitzel.shelfify.funktionen.RemoveProductActivity
@@ -17,13 +13,6 @@ import de.schnitzel.shelfify.funktionen.ShowAllProductsActivity
 import de.schnitzel.shelfify.funktionen.ShowAllSpoiledProductsActivity
 import de.schnitzel.shelfify.util.disableButton
 import de.schnitzel.shelfify.util.syncWithServer
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 lateinit var prefs: SharedPreferences
 
