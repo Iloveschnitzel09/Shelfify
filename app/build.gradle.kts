@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -49,6 +51,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.play.services.mlkit.barcode.scanning)
+    implementation(libs.firebase.crashlytics)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
