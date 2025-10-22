@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -78,6 +79,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 cameraProvider = cameraProviderFuture.get()
                 bindPreviewAndAnalyzer()
             } catch (e: Exception) {
+                Log.e("BarcodeScanner", e.stackTrace.toString())
                 Toast.makeText(this, "Kamera konnte nicht gestartet werden", Toast.LENGTH_SHORT)
                     .show()
                 finish()
@@ -124,7 +126,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 "🔦 Licht aus" else "🔦 Licht an"
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("BarcodeScanner", e.stackTrace.toString())
             Toast.makeText(this, "Kamera konnte nicht initialisiert werden", Toast.LENGTH_SHORT)
                 .show()
             finish()
@@ -148,8 +150,9 @@ class BarcodeScannerActivity : AppCompatActivity() {
                     }
                     imageProxy.close()
                 }
-                .addOnFailureListener {
+                .addOnFailureListener { exception ->
                     imageProxy.close()
+                    Log.e("BarcodeScanner", exception.stackTrace.toString())
                     Toast.makeText(this, "Fehler beim Scannen", Toast.LENGTH_SHORT).show()
                 }
         } else {

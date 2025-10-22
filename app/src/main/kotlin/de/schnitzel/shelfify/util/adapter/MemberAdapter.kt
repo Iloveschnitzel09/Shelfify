@@ -2,6 +2,7 @@ package de.schnitzel.shelfify.util.adapter
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +12,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
-import de.schnitzel.shelfify.funktionen.SettingsActivity
 import de.schnitzel.shelfify.prefs
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -44,25 +42,43 @@ class MemberAdapter(
 
         holder.removeButton.setOnClickListener {
             Thread {
-                val token = prefs.getString("token", "null")
-                val id = prefs.getInt("app_id", -1)
-                val conn = URL("${BASE_URL}/kickFromDatagroup?id=$id&token=$token&email=$email").openConnection() as HttpURLConnection
+                try {
+                    val token = prefs.getString("token", "null")
+                    val id = prefs.getInt("app_id", -1)
+                    val conn = URL("${BASE_URL}/kickFromDatagroup?id=$id&token=$token&email=$email").openConnection() as HttpURLConnection
 
+                    conn.requestMethod = "POST"
+                    val code = conn.responseCode
+                    conn.disconnect()
 
-                conn.requestMethod = "POST"
-                val code = conn.responseCode
-                conn.disconnect()
-
-                if (code == 200) {
-                    (holder.itemView.context as Activity).runOnUiThread {
-                        Toast.makeText(holder.itemView.context, "$email wurde entfernt", Toast.LENGTH_SHORT).show()
-                        (members as MutableList).remove(email)
-                        notifyItemRemoved(holder.adapterPosition)
-
+                    when (code) {
+                        200 -> {
+                            (holder.itemView.context as Activity).runOnUiThread {
+                                Toast.makeText(holder.itemView.context, "$email wurde entfernt", Toast.LENGTH_SHORT).show()
+                                (members as MutableList).remove(email)
+                                notifyItemRemoved(holder.adapterPosition)
+                            }
+                        }
+                        401 -> {
+                            (holder.itemView.context as Activity).runOnUiThread {
+                                Toast.makeText(holder.itemView.context, "Ungültige Anmeldedaten", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        502 -> {
+                            (holder.itemView.context as Activity).runOnUiThread {
+                                Toast.makeText(holder.itemView.context, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        else -> {
+                            (holder.itemView.context as Activity).runOnUiThread {
+                                Toast.makeText(holder.itemView.context, "Fehler beim Entfernen (Code: $code)", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
-                } else {
+                } catch (e: Exception) {
+                    Log.e("MemberAdapter", e.stackTrace.toString())
                     (holder.itemView.context as Activity).runOnUiThread {
-                        Toast.makeText(holder.itemView.context, "Fehler beim Entfernen", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(holder.itemView.context, "Fehler beim anzeigen", Toast.LENGTH_SHORT).show()
                     }
                 }
             }.start()

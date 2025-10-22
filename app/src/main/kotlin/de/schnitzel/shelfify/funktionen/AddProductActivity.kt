@@ -1,7 +1,6 @@
 package de.schnitzel.shelfify.funktionen
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -250,7 +249,7 @@ class AddProductActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e("AddProduct",  e.stackTrace.toString())
                 runOnUiThread {
-                    Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Fehler beim hinzufügen", Toast.LENGTH_SHORT).show()
                 }
             }
         }.start()

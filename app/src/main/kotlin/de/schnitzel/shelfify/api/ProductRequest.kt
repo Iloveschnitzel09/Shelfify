@@ -3,7 +3,6 @@ package de.schnitzel.shelfify.api
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import de.schnitzel.shelfify.util.adapter.ProductAdapter
 import de.schnitzel.shelfify.util.Products
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -16,14 +15,14 @@ fun productRequest(request: Request, client: OkHttpClient): List<Products>? {
             val jsonResponse = response.body?.string()
             val listType = object : TypeToken<List<Products>>() {}.type
             val products = Gson().fromJson<List<Products>>(jsonResponse, listType)
-            Log.e("PR", "Es wurden ${products?.size ?: "null"} Produkte geladen.")
+            Log.i("ProductRequest", "Erfolgreich ${products?.size ?: 0} Produkte geladen")
             return products
         } else {
-            Log.e("PR", "Anfragen fehler. ${response.code}")
+            Log.e("ProductRequest", "HTTP-Fehler beim Laden der Produkte: ${response.code}")
             return null
         }
     } catch (e: IOException) {
-        Log.e("PR", "Scheißendreck: ${e.message}")
+        Log.e("ProductRequest", "Netzwerkfehler beim Laden der Produkte: ${e.message}")
         return null
     }
 }
