@@ -32,6 +32,7 @@ class AddProductActivity : AppCompatActivity() {
     private lateinit var etQuantity : EditText
     private var selectedQuantity = 1
     private var addEan = false
+    private val client = OkHttpClient()
 
     private var barcodeLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -150,35 +151,34 @@ class AddProductActivity : AppCompatActivity() {
 
         Thread {
             try {
-                val client = OkHttpClient()
                 val request = Request.Builder()
                     .url(url)
                     .build()
 
-                val response = client.newCall(request).execute()
-
-                if (response.isSuccessful) {
-                    val name = response.body?.string() ?: ""
-
-                    runOnUiThread {
-                        editTextProductName.setText(name)
-                        Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
-                        editTextProductName.isEnabled = false
-                        addEan = false
-                    }
-                } else {
-                    runOnUiThread {
-                        Log.e("ap", response.body?.string() ?: "leer")
-                        when (response.code) {
-                            404 -> Toast.makeText(this, "Produktname nicht gefunden – bitte eingeben", Toast.LENGTH_SHORT).show()
-                            502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
-                            else -> Toast.makeText(this, "Unerwarteter Fehler: ${response.code}", Toast.LENGTH_SHORT).show()
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val name = response.body?.string() ?: ""
+                        runOnUiThread {
+                            editTextProductName.setText(name)
+                            Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
+                            editTextProductName.isEnabled = false
+                            addEan = false
                         }
-                        editTextProductName.isEnabled = true
-                        addEan = true
+                    } else {
+                        runOnUiThread {
+                            Log.e("ap", response.body?.string() ?: "leer")
+                            when (response.code) {
+                                404 -> Toast.makeText(this, "Produktname nicht gefunden – bitte eingeben", Toast.LENGTH_SHORT).show()
+                                502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                                else -> Toast.makeText(this, "Unerwarteter Fehler: ${response.code}", Toast.LENGTH_SHORT).show()
+                            }
+                            editTextProductName.isEnabled = true
+                            addEan = true
+                        }
                     }
                 }
             } catch (e: Exception) {
+                Log.e("AddProduct", "checkEan failed", e)
                 runOnUiThread {
                     Toast.makeText(this, "Fehler beim Abrufen", Toast.LENGTH_SHORT).show()
                 }
@@ -191,8 +191,8 @@ class AddProductActivity : AppCompatActivity() {
             try {
                 val token = prefs.getString("token", "null")
                 val id = prefs.getInt("app_id", -1)
-                val client = OkHttpClient()
 
+                // Wenn EAN neu ist -> zuerst EAN hinzufügen
                 if (add) {
                     val eanFormBody = FormBody.Builder()
                         .add("ean", ean)
@@ -206,68 +206,57 @@ class AddProductActivity : AppCompatActivity() {
                         .post(eanFormBody)
                         .build()
 
-                    val response = client.newCall(eanRequest).execute()
-
-                    if (!response.isSuccessful) {
-                        runOnUiThread {
-                            when (response.code) {
-                                400 -> Toast.makeText(this, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT).show()
-                                409 -> Toast.makeText(this, "Name schon vorhanden", Toast.LENGTH_SHORT).show()
-                                502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
-                                else -> Toast.makeText(this, "Unerwarteter Fehler: ${response.code}", Toast.LENGTH_SHORT).show()
+                    client.newCall(eanRequest).execute().use { response ->
+                        if (!response.isSuccessful) {
+                            runOnUiThread {
+                                when (response.code) {
+                                    400 -> Toast.makeText(this, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT).show()
+                                    409 -> Toast.makeText(this, "Name schon vorhanden", Toast.LENGTH_SHORT).show()
+                                    502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                                    else -> Toast.makeText(this, "Unerwarteter Fehler: ${response.code}", Toast.LENGTH_SHORT).show()
+                                }
                             }
+                            return@Thread
                         }
-
-                        return@Thread
                     }
-
-
-                    response.close()
                 }
 
-                val addProductBody = FormBody.Builder()
+                // Produkt hinzufügen (EAN mitgeben, falls vorhanden)
+                val addProductBodyBuilder = FormBody.Builder()
                     .add("name", name)
                     .add("ablaufdatum", datum)
                     .add("id", id.toString())
                     .add("token", token ?: "")
                     .add("quantity", quantity)
-                    .build()
+
+                if (ean.isNotEmpty()) {
+                    addProductBodyBuilder.add("ean", ean)
+                }
+
+                val addProductBody = addProductBodyBuilder.build()
 
                 val addProductRequest = Request.Builder()
                     .url("$BASE_URL/addProduct")
                     .post(addProductBody)
                     .build()
 
-                val response = client.newCall(addProductRequest).execute()
-
-                val responseCode = response.code
-                response.close()
-
-                runOnUiThread {
-                    when (responseCode) {
-                        200 -> {
-                            Toast.makeText(this, "Produkt hinzugefügt", Toast.LENGTH_SHORT).show()
-                            // Felder leeren
-                            editTextEan.text.clear()
-                            editTextProductName.text.clear()
-                            editTextDate.text.clear()
-//                            editTextProductName.visibility = View.GONE
+                client.newCall(addProductRequest).execute().use { response ->
+                    val responseCode = response.code
+                    runOnUiThread {
+                        when (responseCode) {
+                            200 -> {
+                                Toast.makeText(this, "Produkt hinzugefügt", Toast.LENGTH_SHORT).show()
+                                editTextEan.text.clear()
+                                editTextProductName.text.clear()
+                                editTextDate.text.clear()
+                            }
+                            409 -> Toast.makeText(this, "Produktname oder EAN existiert bereits", Toast.LENGTH_SHORT).show()
+                            else -> Toast.makeText(this, "Fehler beim Hinzufügen (Code: $responseCode)", Toast.LENGTH_SHORT).show()
                         }
-
-                        409 -> Toast.makeText(
-                            this,
-                            "Produktname oder EAN existiert bereits",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        else -> Toast.makeText(
-                            this,
-                            "Fehler beim Hinzufügen (Code: $responseCode)",
-                            Toast.LENGTH_SHORT
-                        ).show()
                     }
                 }
             } catch (e: Exception) {
+                Log.e("AddProduct", "addNewProduct failed", e)
                 runOnUiThread {
                     Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
                 }
