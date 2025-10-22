@@ -23,6 +23,7 @@ import androidx.core.content.edit
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import de.schnitzel.shelfify.R
@@ -81,17 +82,17 @@ class SettingsActivity : AppCompatActivity() {
 
         val btnSaveEmail: Button = findViewById(R.id.btnSaveEmail)
 
-        val verifyHeader : TextView = findViewById(R.id.tvVerificationHeader)
+        val verifyHeader : MaterialCardView = findViewById(R.id.tvVerificationHeader)
         val verifySection : LinearLayout = findViewById(R.id.verificationSection)
-        val emailHeader : TextView = findViewById(R.id.tvEmailHeader)
+        val emailHeader : MaterialCardView = findViewById(R.id.tvEmailHeader)
         val emailSection : LinearLayout = findViewById(R.id.emailSection)
-        val notifyHeader: TextView = findViewById(R.id.tvNotificationsHeader)
+        val notifyHeader: MaterialCardView = findViewById(R.id.tvNotificationsHeader)
         val notifySection: LinearLayout = findViewById(R.id.notificationsSection)
-        val groupHeader: TextView = findViewById(R.id.tvGroupHeader)
+        val groupHeader: MaterialCardView = findViewById(R.id.tvGroupHeader)
         val groupSection: LinearLayout = findViewById(R.id.groupSection)
-        val memberHeader: TextView = findViewById(R.id.tvMemberHeader)
+        val memberHeader: MaterialCardView = findViewById(R.id.tvMemberHeader)
         val memberSection: LinearLayout = findViewById(R.id.memberSection)
-        val deleteHeader: TextView = findViewById(R.id.tvDeleteHeader)
+        val deleteHeader: MaterialCardView = findViewById(R.id.tvDeleteHeader)
         val deleteSection: LinearLayout = findViewById(R.id.deleteSection)
 
 
