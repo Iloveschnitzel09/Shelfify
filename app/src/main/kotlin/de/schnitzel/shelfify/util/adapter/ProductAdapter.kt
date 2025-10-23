@@ -1,13 +1,19 @@
 package de.schnitzel.shelfify.util.adapter
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
@@ -61,6 +67,30 @@ class ProductAdapter(private val productList: List<Products>) :
                 }
             }
 
+            holder.sectionProduct.setOnClickListener {
+                val ctx = holder.itemView.context
+                val input = EditText(ctx).apply {
+                    inputType = InputType.TYPE_CLASS_TEXT
+                    setText(item.produktname)
+                    setSelection(text.length)
+                }
+
+                val dialog = AlertDialog.Builder(ctx)
+                    .setTitle("Produkt umbenennen")
+                    .setView(input)
+                    .setPositiveButton("Umbenennen") { _, _ ->
+                        val newName = input.text.toString().trim()
+                        if (newName.isNotEmpty() && newName != item.produktname) {
+                            //renameProduct(item.produktname, newName) TODO: Implement renaming logic
+                            holder.tvProduktname.text = newName
+                        }
+                    }
+                    .setNegativeButton("Abbrechen", null)
+                    .create()
+
+                dialog.show()
+            }
+
         } catch (e: Exception) {
             e.printStackTrace()
             holder.tvAblaufdatum.text = "Ablauf: Unbekannt"
@@ -76,5 +106,7 @@ class ProductAdapter(private val productList: List<Products>) :
         val tvProduktname: TextView = itemView.findViewById(R.id.tvProductname)
         val tvMenge: TextView = itemView.findViewById(R.id.tvTime)
         val tvAblaufdatum: TextView = itemView.findViewById(R.id.tvAblaufdatum)
+
+        val sectionProduct: LinearLayout = itemView.findViewById(R.id.sectionProduct)
     }
 }
