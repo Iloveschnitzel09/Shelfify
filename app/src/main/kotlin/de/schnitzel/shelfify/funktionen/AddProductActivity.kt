@@ -1,7 +1,6 @@
 package de.schnitzel.shelfify.funktionen
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -166,7 +165,6 @@ class AddProductActivity : AppCompatActivity() {
                         }
                     } else {
                         runOnUiThread {
-                            Log.e("ap", response.body?.string() ?: "leer")
                             when (response.code) {
                                 404 -> Toast.makeText(this, "Produktname nicht gefunden – bitte eingeben", Toast.LENGTH_SHORT).show()
                                 502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
@@ -178,7 +176,7 @@ class AddProductActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                Log.e("AddProduct", "checkEan failed", e)
+                Log.e("AddProduct", e.stackTrace.toString())
                 runOnUiThread {
                     Toast.makeText(this, "Fehler beim Abrufen", Toast.LENGTH_SHORT).show()
                 }
@@ -192,7 +190,6 @@ class AddProductActivity : AppCompatActivity() {
                 val token = prefs.getString("token", "null")
                 val id = prefs.getInt("app_id", -1)
 
-                // Wenn EAN neu ist -> zuerst EAN hinzufügen
                 if (add) {
                     val eanFormBody = FormBody.Builder()
                         .add("ean", ean)
@@ -221,19 +218,13 @@ class AddProductActivity : AppCompatActivity() {
                     }
                 }
 
-                // Produkt hinzufügen (EAN mitgeben, falls vorhanden)
-                val addProductBodyBuilder = FormBody.Builder()
+                val addProductBody = FormBody.Builder()
                     .add("name", name)
                     .add("ablaufdatum", datum)
                     .add("id", id.toString())
                     .add("token", token ?: "")
                     .add("quantity", quantity)
-
-                if (ean.isNotEmpty()) {
-                    addProductBodyBuilder.add("ean", ean)
-                }
-
-                val addProductBody = addProductBodyBuilder.build()
+                    .build()
 
                 val addProductRequest = Request.Builder()
                     .url("$BASE_URL/addProduct")
@@ -256,9 +247,9 @@ class AddProductActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                Log.e("AddProduct", "addNewProduct failed", e)
+                Log.e("AddProduct",  e.stackTrace.toString())
                 runOnUiThread {
-                    Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Fehler beim hinzufügen", Toast.LENGTH_SHORT).show()
                 }
             }
         }.start()

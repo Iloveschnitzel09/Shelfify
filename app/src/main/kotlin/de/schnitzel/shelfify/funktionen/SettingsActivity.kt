@@ -12,7 +12,6 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.Patterns
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -21,27 +20,28 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.inviteGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.joinGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.leaveGroup
 import de.schnitzel.shelfify.prefs
+import de.schnitzel.shelfify.util.adapter.MemberAdapter
 import de.schnitzel.shelfify.util.disableButton
 import de.schnitzel.shelfify.util.syncWithServer
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import androidx.core.view.isVisible
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import de.schnitzel.shelfify.util.adapter.MemberAdapter
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -82,17 +82,17 @@ class SettingsActivity : AppCompatActivity() {
 
         val btnSaveEmail: Button = findViewById(R.id.btnSaveEmail)
 
-        val verifyHeader : TextView = findViewById(R.id.tvVerificationHeader)
+        val verifyHeader : MaterialCardView = findViewById(R.id.tvVerificationHeader)
         val verifySection : LinearLayout = findViewById(R.id.verificationSection)
-        val emailHeader : TextView = findViewById(R.id.tvEmailHeader)
+        val emailHeader : MaterialCardView = findViewById(R.id.tvEmailHeader)
         val emailSection : LinearLayout = findViewById(R.id.emailSection)
-        val notifyHeader: TextView = findViewById(R.id.tvNotificationsHeader)
+        val notifyHeader: MaterialCardView = findViewById(R.id.tvNotificationsHeader)
         val notifySection: LinearLayout = findViewById(R.id.notificationsSection)
-        val groupHeader: TextView = findViewById(R.id.tvGroupHeader)
+        val groupHeader: MaterialCardView = findViewById(R.id.tvGroupHeader)
         val groupSection: LinearLayout = findViewById(R.id.groupSection)
-        val memberHeader: TextView = findViewById(R.id.tvMemberHeader)
+        val memberHeader: MaterialCardView = findViewById(R.id.tvMemberHeader)
         val memberSection: LinearLayout = findViewById(R.id.memberSection)
-        val deleteHeader: TextView = findViewById(R.id.tvDeleteHeader)
+        val deleteHeader: MaterialCardView = findViewById(R.id.tvDeleteHeader)
         val deleteSection: LinearLayout = findViewById(R.id.deleteSection)
 
 
@@ -252,7 +252,7 @@ class SettingsActivity : AppCompatActivity() {
                     colorVerifyText(verified)
                 }
             } catch (e: Exception) {
-                Log.e("loadSett", "Error: $e")
+                Log.e("SettingsActivity", e.stackTrace.toString())
             }
         }.start() // Ende Thread
     }
@@ -287,14 +287,21 @@ class SettingsActivity : AppCompatActivity() {
                         401 -> {
                             Toast.makeText(
                                 this,
-                                "Fehlende Daten",
+                                "Ungültige Anmeldedaten",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        502 -> {
+                            Toast.makeText(
+                                this,
+                                "Netzwerkfehler",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
                         else -> {
                             Toast.makeText(
                                 this,
-                                "Fehler beim Senden des Codes$responseCode",
+                                "Fehler beim Senden des Codes: $responseCode",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -302,7 +309,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 conn.disconnect()
             } catch (e: Exception) {
-                Log.e("rqv", "Error: $e")
+                Log.e("SettingsActivity", e.stackTrace.toString())
                 runOnUiThread { Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show() }
             }
         }.start()
@@ -329,17 +336,21 @@ class SettingsActivity : AppCompatActivity() {
 
                 val responseCode = conn.responseCode
                 runOnUiThread {
-                    if (responseCode == 200) {
-                        Toast.makeText(this, "E-Mail erfolgreich verifiziert", Toast.LENGTH_SHORT)
-                            .show()
-                        prefs.edit { putBoolean("verify", true) }
-                        loadCurrentSettings()
-                    } else {
-                        Toast.makeText(this, "Ungültiger Code", Toast.LENGTH_SHORT).show()
+                    when (responseCode) {
+                        200 -> {
+                            Toast.makeText(this, "E-Mail erfolgreich verifiziert", Toast.LENGTH_SHORT)
+                                .show()
+                            prefs.edit { putBoolean("verify", true) }
+                            loadCurrentSettings()
+                        }
+                        400 -> Toast.makeText(this, "Ungültiger Code", Toast.LENGTH_SHORT).show()
+                        502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                        else -> Toast.makeText(this, "Fehler bei der Verifizierung (Code: $responseCode)", Toast.LENGTH_SHORT).show()
                     }
                 }
                 conn.disconnect()
             } catch (e: Exception) {
+                Log.e("SettingsActivity", e.stackTrace.toString())
                 runOnUiThread { Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show() }
             }
         }.start()
@@ -371,24 +382,44 @@ class SettingsActivity : AppCompatActivity() {
 
                 val responseCode = conn.responseCode
                 runOnUiThread {
-                    if (responseCode == 200) {
-                        prefs.edit { putBoolean("notify", notify) }
-                        Toast.makeText(
-                            this,
-                            "Benachrichtigungseinstellungen gespeichert",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        Toast.makeText(
-                            this,
-                            "Fehler beim Speichern der Einstellungen",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        switchNotifications.isChecked = !notify
+                    when (responseCode) {
+                        200 -> {
+                            prefs.edit { putBoolean("notify", notify) }
+                            Toast.makeText(
+                                this,
+                                "Benachrichtigungseinstellungen gespeichert",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        401 -> {
+                            Toast.makeText(
+                                this,
+                                "Ungültige Anmeldedaten",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            switchNotifications.isChecked = !notify
+                        }
+                        502 -> {
+                            Toast.makeText(
+                                this,
+                                "Netzwerkfehler",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            switchNotifications.isChecked = !notify
+                        }
+                        else -> {
+                            Toast.makeText(
+                                this,
+                                "Fehler beim Speichern der Einstellungen (Code: $responseCode)",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            switchNotifications.isChecked = !notify
+                        }
                     }
                 }
                 conn.disconnect()
             } catch (e: Exception) {
+                Log.e("SettingsActivity", e.stackTrace.toString())
                 runOnUiThread {
                     Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
                 }
@@ -429,19 +460,19 @@ class SettingsActivity : AppCompatActivity() {
                             syncWithServer()
                             loadCurrentSettings()
                         }
-
                         409 -> Toast.makeText(
                             this,
                             "Diese E-Mail wird bereits verwendet",
                             Toast.LENGTH_SHORT
                         ).show()
-
                         401 -> Toast.makeText(this, "Ungültiger Token", Toast.LENGTH_SHORT).show()
-                        else -> Toast.makeText(this, "Fehler beim Speichern", Toast.LENGTH_SHORT)
+                        502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                        else -> Toast.makeText(this, "Fehler beim Speichern (Code: ${response.code})", Toast.LENGTH_SHORT)
                             .show()
                     }
                 }
             } catch (e: Exception) {
+                Log.e("SettingsActivity", e.stackTrace.toString())
                 runOnUiThread { Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show() }
             }
         }.start()
@@ -480,7 +511,11 @@ class SettingsActivity : AppCompatActivity() {
                 }
             } else {
                 runOnUiThread {
-                    Toast.makeText(this, "Fehler beim Laden der Mitglieder", Toast.LENGTH_SHORT).show()
+                    when (response.code) {
+                        401 -> Toast.makeText(this, "Ungültige Anmeldedaten", Toast.LENGTH_SHORT).show()
+                        502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                        else -> Toast.makeText(this, "Fehler beim Laden der Mitglieder (Code: ${response.code})", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }.start()
@@ -567,22 +602,26 @@ class SettingsActivity : AppCompatActivity() {
                 val response =  client.newCall(request).execute()
 
                 runOnUiThread {
-                    if (response.isSuccessful) {
-                        Toast.makeText(this, "Daten gelöscht", Toast.LENGTH_SHORT).show()
-                        prefs.edit {
-                            putString("token", null)
-                            putInt("app_id", -1)
-                            putString("email", null)
-                            apply()
+                    when (response.code) {
+                        200 -> {
+                            Toast.makeText(this, "Daten gelöscht", Toast.LENGTH_SHORT).show()
+                            prefs.edit {
+                                putString("token", null)
+                                putInt("app_id", -1)
+                                putString("email", null)
+                                apply()
+                            }
+                            syncWithServer {
+                                loadCurrentSettings()
+                            }
                         }
-                        syncWithServer {
-                            loadCurrentSettings()
-                        }
-                    } else {
-                        Toast.makeText(this, "Fehler beim Löschen", Toast.LENGTH_SHORT).show()
+                        401 -> Toast.makeText(this, "Ungültige Anmeldedaten", Toast.LENGTH_SHORT).show()
+                        502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                        else -> Toast.makeText(this, "Fehler beim Löschen (Code: ${response.code})", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
+                Log.e("SettingsActivity", e.stackTrace.toString())
                 runOnUiThread {
                     Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
                 }
