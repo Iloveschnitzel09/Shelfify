@@ -6,18 +6,25 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.text.InputType
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
+import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
+import de.schnitzel.shelfify.prefs
 import de.schnitzel.shelfify.util.Products
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
@@ -26,6 +33,8 @@ import java.util.Locale
 
 class ProductAdapter(private val productList: List<Products>) :
     RecyclerView.Adapter<ProductAdapter.ViewHolder>() {
+
+    private val client = OkHttpClient()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
@@ -81,8 +90,7 @@ class ProductAdapter(private val productList: List<Products>) :
                     .setPositiveButton("Umbenennen") { _, _ ->
                         val newName = input.text.toString().trim()
                         if (newName.isNotEmpty() && newName != item.produktname) {
-                            //renameProduct(item.produktname, newName) TODO: Implement renaming logic
-                            holder.tvProduktname.text = newName
+                            renameProduct(item.produktname, newName, holder)
                         }
                     }
                     .setNegativeButton("Abbrechen", null)
@@ -106,7 +114,39 @@ class ProductAdapter(private val productList: List<Products>) :
         val tvProduktname: TextView = itemView.findViewById(R.id.tvProductname)
         val tvMenge: TextView = itemView.findViewById(R.id.tvTime)
         val tvAblaufdatum: TextView = itemView.findViewById(R.id.tvAblaufdatum)
-
         val sectionProduct: LinearLayout = itemView.findViewById(R.id.sectionProduct)
+    }
+
+    fun renameProduct(oldName: String, newName: String, holder: ViewHolder) {
+        Thread {
+            try {
+                val token = prefs.getString("token", "null")
+                val id = prefs.getInt("app_id", -1)
+
+                val renameFormBody = FormBody.Builder()
+                    .add("oldName", oldName)
+                    .add("newName", newName)
+                    .add("id", id.toString())
+                    .add("token", token ?: "")
+                    .build()
+
+
+                val renameRequest = Request.Builder()
+                    .url("$BASE_URL/addProduct")
+                    .post(renameFormBody)
+                    .build()
+
+                client.newCall(renameRequest).execute().use { response ->
+                    if(response.code == 200) {
+                        holder.tvProduktname.text = newName
+                        Log.d("ProductAdapter", "Produkt erfolgreich umbenannt.")
+                    } else {
+                        Log.e("ProductAdapter", "Fehler beim Umbenennen des Produkts: ${response.code}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ProductAdapter", e.stackTrace.toString())
+            }
+        }.start()
     }
 }
