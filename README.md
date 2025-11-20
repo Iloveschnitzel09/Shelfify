@@ -1,44 +1,50 @@
-# Shelfify
+# **Shelfify**
 
-
-Shelfify ist eine Android-App zur **Verwaltung von Lebensmitteln** und zur **Rezepte-Organisation**.  
-Ziel ist es, Lebensmittel per Barcode oder manuell einzutragen, deren Ablaufdaten im Blick zu behalten und Rezepte basierend auf vorhandenen Zutaten zu nutzen.  
-Alle Daten können optional über eine API synchronisiert und mit **Datagroups** geteilt werden.
-
+**Shelfify** is an Android app for **managing groceries** and **organizing recipes**.  
+The app lets you add products manually or via barcode, track expiration dates, and use recipes based on the items you already have.  
+All data is synchronized through a dedicated **Spring Boot API** and can be shared with others using **Datagroups**.
 
 ---
-
 
 ## ✨ Features ✨
 
-- **Lebensmittelverwaltung**
-  - Produkte hinzufügen (Name, EAN, Ablaufdatum)
-  - Produkte entfernen
-  - Abgelaufene Produkte automatisch anzeigen
-- **Rezepte** *(in Bearbeitung)*
-  - Rezepte mit Zutaten, Zubereitung und Dauer speichern
-  - Filterbuttons im RecyclerView für gezieltes Durchsuchen
-- **Barcode-Scanner**
-  - Integration von Google ML Kit für schnelles Eintragen per Barcode
-- **Benachrichtigungen**
-  - Erinnerung an ablaufende Produkte
-  - Einstellbare E-Mail-Benachrichtigungen und Notify-Optionen
-- **Datagroups** *(in Bearbeitung)*
-  - Teilen von Daten mit mehreren Nutzern
-  - Einladung per E-Mail-Link direkt in die App
-- **E-Mail-Integration**
-  - E-Mail-Verknüpfung mit der App-ID
-  - Token-basierte Authentifizierung für Änderungen
-  - **E-Mail-Verifizierung bereits integriert**
-- **Sicherheit & API**
-  - HTTPS-Unterstützung ist in Planung
-  - Lokale App-ID für eindeutige Zuordnung von Nutzerdaten
+### 🧺 Food Management
+- ✅ Add products (name, EAN, expiration date)  
+- ✅ Remove products  
+- ✅ Automatically display expired products  
 
+### 🍳 Recipes *(in progress)*
+- 🔄 Store recipes with ingredients, preparation steps, and duration  
+- 🔄 Filter buttons in the RecyclerView for quick and focused browsing  
+
+### 📷 Barcode Scanner
+- ✅ Integrated **Google ML Kit** for fast barcode-based product entry  
+
+### 🔔 Notifications
+- ✅ Reminders for expiring products  
+- ✅ Configurable per **email**
+
+### 👥 Datagroups
+- ✅ Share your food inventory with multiple users  
+- ✅ Invite users via email link directly to the app  
+- 🔄 **Block invitations** *(in progress – Issue #5)*  
+- ✅ Datagroup management and member overview
+- 🔄 Rename products within Datagroups *(Issue #15)*  
+
+### 📧 Email Integration
+- ✅ Link your email address with your unique app ID  
+- ✅ Token-based authentication for secure updates  
+- ✅ Email verification implemented  
+
+### 🔒 Security & API
+- ✅ HTTPS support 
+- ✅ Unique **App-ID** for reliable user data assignment  
+- 🔄 Encrypt SharedPreferences for improved security *(Issue #19)*  
 
 ---
 
+## ⚙️ API (ShelfifyApi)
 
-## API (ShelfifyApi)
-
-Shelfify nutzt eine eigene Spring Boot API. Repo: [ShelfifyApi](https://github.com/Iloveschnitzel09/ShelfifyApi)
-
+Shelfify uses a dedicated **Spring Boot API** to handle all product, recipe, and user synchronization logic.  
+API repository:  
+👉 [ShelfifyApi Repository](https://github.com/Iloveschnitzel09/ShelfifyApi)

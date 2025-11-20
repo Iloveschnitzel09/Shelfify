@@ -15,6 +15,7 @@
 
         <!-- Abschnitt: E-Mail Einstellungen -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/tvEmailHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
@@ -29,7 +30,6 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvEmailHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
@@ -80,6 +80,7 @@
 
         <!-- Abschnitt: Verifizierung -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/tvVerificationHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
@@ -94,7 +95,6 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvVerificationHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
@@ -175,6 +175,7 @@
 
         <!-- Abschnitt: Benachrichtigungen -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/tvNotificationsHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
@@ -189,7 +190,6 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvNotificationsHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
@@ -230,6 +230,7 @@
 
         <!-- Abschnitt: Gruppenverwaltung -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/tvGroupHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
@@ -244,7 +245,6 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvGroupHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
@@ -349,6 +349,7 @@
 
         <!-- Abschnitt: Gruppenmitglieder -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/tvMemberHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
@@ -363,7 +364,6 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvMemberHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
@@ -396,6 +396,7 @@
 
         <!-- Abschnitt: E-Mail Einstellungen -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/tvDeleteHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
@@ -410,7 +411,6 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/tvDeleteHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"

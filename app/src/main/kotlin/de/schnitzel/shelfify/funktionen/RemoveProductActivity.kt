@@ -2,6 +2,7 @@ package de.schnitzel.shelfify.funktionen
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -74,21 +75,26 @@ class RemoveProductActivity : AppCompatActivity() {
                     .url(url)
                     .build()
 
-                val response = client.newCall(request).execute()
-
-                if (response.isSuccessful) {
-                    val name = response.body?.string() ?: ""
-                    runOnUiThread {
-                        editTextName.setText(name)
-                        Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
-                        editTextName.isEnabled = false
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(this, "Produktname nicht gefunden – bitte eingeben", Toast.LENGTH_SHORT).show()
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val name = response.body?.string() ?: ""
+                        runOnUiThread {
+                            editTextName.setText(name)
+                            Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
+                            editTextName.isEnabled = false
+                        }
+                    } else {
+                        runOnUiThread {
+                            when (response.code) {
+                                404 -> Toast.makeText(this, "Produktname nicht gefunden – bitte eingeben", Toast.LENGTH_SHORT).show()
+                                502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                                else -> Toast.makeText(this, "Unerwarteter Fehler: ${response.code}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {
+                Log.e("RemoveProduct", "Fehler beim Abrufen des Produktnamens: ${e.stackTrace.toString()}")
                 runOnUiThread {
                     Toast.makeText(this, "Fehler beim Abrufen", Toast.LENGTH_SHORT).show()
                 }
@@ -110,24 +116,26 @@ class RemoveProductActivity : AppCompatActivity() {
                     .delete()
                     .build()
 
-                val response = client.newCall(removeRequest).execute()
-
-                runOnUiThread {
-                    if (response.isSuccessful) {
-                        Toast.makeText(this, "Produkt entfernt", Toast.LENGTH_SHORT).show()
-                        editTextEan.text.clear()
-                    } else {
-                        Toast.makeText(
-                            this,
-                            "Produkt nicht gefunden ${response.code}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                client.newCall(removeRequest).execute().use { response ->
+                    runOnUiThread {
+                        when (response.code) {
+                            200 -> {
+                                Toast.makeText(this, "Produkt entfernt", Toast.LENGTH_SHORT).show()
+                                editTextEan.text.clear()
+                                editTextName.text.clear()
+                                editTextQuantity.text.clear()
+                            }
+                            404 -> Toast.makeText(this, "Produkt nicht gefunden", Toast.LENGTH_SHORT).show()
+                            502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                            else -> Toast.makeText(this, "Fehler beim Entfernen (Code: ${response.code})", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             } catch (e: Exception) {
-                runOnUiThread(Runnable {
-                    Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
-                })
+                Log.e("RemoveProduct", e.stackTrace.toString())
+                runOnUiThread {
+                    Toast.makeText(this, "Fehler beim Entfernen", Toast.LENGTH_SHORT).show()
+                }
             }
         }.start()
     }

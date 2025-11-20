@@ -3,7 +3,7 @@ package de.schnitzel.shelfify.util
 import android.util.Log
 import androidx.core.content.edit
 import com.android.identity.util.UUID
-import de.schnitzel.shelfify.api.ApiConfig
+import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.prefs
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -22,7 +22,7 @@ fun syncWithServer(onComplete: (() -> Unit)? = null) {
                 prefs.edit { putString("token", token) }
             }
 
-            var urlStr = ApiConfig.BASE_URL + "/appSync"
+            var urlStr = "$BASE_URL/appSync"
 
             urlStr += if (savedId != -1) {
                 "?id=$savedId&token=$token"
@@ -30,7 +30,7 @@ fun syncWithServer(onComplete: (() -> Unit)? = null) {
                 "?token=$token"
             }
 
-            Log.v("sync", "id$savedId")
+            Log.i("AppSync", "id$savedId")
 
             val url = URL(urlStr)
             val conn = url.openConnection() as HttpURLConnection
@@ -50,25 +50,25 @@ fun syncWithServer(onComplete: (() -> Unit)? = null) {
                 val id = json.getInt("id")
                 if (savedId != id) {
                     prefs.edit { putInt("app_id", id) }
-                    Log.e("sync", "Neue ID gespeichert: $id")
+                    Log.i("AppSync", "Neue ID gespeichert: $id")
                 }
 
                 val email = json.getString("email")
                 if (email != prefs.getString("email", " ")) {
                     prefs.edit { putString("email", email) }
-                    Log.e("sync", "Neue Email gespeichert: $email")
+                    Log.i("AppSync", "Neue Email gespeichert: $email")
                 }
 
                 val notify = json.getBoolean("notify")
                 if (prefs.getBoolean("notify", false) != notify) {
                     prefs.edit { putBoolean("notify", notify) }
-                    Log.e("sync", "Notify geändert: $notify")
+                    Log.i("AppSync", "Notify geändert: $notify")
                 }
 
                 val verify = json.getBoolean("verified")
                 if (prefs.getBoolean("verify", false) != verify) {
                     prefs.edit { putBoolean("verify", verify) }
-                    Log.e("sync", "Verify geändert: $verify")
+                    Log.i("AppSync", "Verify geändert: $verify")
                 }
 
                 onComplete?.invoke()
@@ -78,7 +78,7 @@ fun syncWithServer(onComplete: (() -> Unit)? = null) {
 
             conn.disconnect()
         } catch (e: Exception) {
-            Log.e("sync", "error: $e")
+            Log.e("AppSync", e.stackTrace.toString())
         }
     }.start()
 }

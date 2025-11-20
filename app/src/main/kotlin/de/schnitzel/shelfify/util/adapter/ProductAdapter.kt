@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Build
-import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -98,7 +97,7 @@ class ProductAdapter(private val productList: List<Products>) :
             }
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("ProductAdapter", e.stackTrace.toString())
             holder.tvAblaufdatum.text = "Ablauf: Unbekannt"
             holder.tvAblaufdatum.setTextColor(Color.GRAY)
         }

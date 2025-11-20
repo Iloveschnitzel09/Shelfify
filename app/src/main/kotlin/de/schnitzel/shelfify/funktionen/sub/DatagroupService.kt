@@ -2,6 +2,7 @@ package de.schnitzel.shelfify.funktionen.sub
 
 import android.app.Activity
 import android.content.SharedPreferences
+import android.util.Log
 import android.widget.Toast
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import kotlinx.coroutines.CoroutineScope
@@ -44,8 +45,9 @@ object DatagroupService {
                     }
                 }
             } catch (e: Exception) {
+                Log.e("DatagroupService", e.stackTrace.toString())
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(activity, "Netzwerkfehler: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -91,8 +93,9 @@ object DatagroupService {
                     }
                 }
             } catch (e: Exception) {
+                Log.e("DatagroupService", e.stackTrace.toString())
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(activity, "Netzwerkfehler: ${e.message}", Toast.LENGTH_SHORT)
+                    Toast.makeText(activity, "Netzwerkfehler", Toast.LENGTH_SHORT)
                         .show()
                 }
             }
@@ -136,8 +139,9 @@ object DatagroupService {
                     }
                 }
             } catch (e: Exception) {
+                android.util.Log.e("DatagroupService", e.stackTrace.toString())
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(activity, "Netzwerkfehler: ${e.message}", Toast.LENGTH_SHORT)
+                    Toast.makeText(activity, "Netzwerkfehler", Toast.LENGTH_SHORT)
                         .show()
                 }
             }
