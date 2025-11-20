@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
@@ -134,11 +135,31 @@ class ProductAdapter(private val productList: List<Products>) :
                     .build()
 
                 client.newCall(renameRequest).execute().use { response ->
-                    if(response.code == 200) {
-                        holder.tvProduktname.text = newName
-                        Log.d("ProductAdapter", "Produkt erfolgreich umbenannt.")
-                    } else {
-                        Log.e("ProductAdapter", "Fehler beim Umbenennen des Produkts: ${response.code}")
+                    val ctx = holder.itemView.context
+                    holder.itemView.post {
+                        when (response.code) {
+                            200 -> {
+                                Toast.makeText(
+                                    ctx,
+                                    "Produkt erfolgreich umbenannt",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                holder.tvProduktname.text = newName
+                            }
+
+                            409 -> Toast.makeText(
+                                ctx,
+                                "Produktname oder EAN existiert bereits",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            else -> Toast.makeText(
+                                ctx,
+                                "Fehler beim Umbenennen: ${response.code}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                        }
                     }
                 }
             } catch (e: Exception) {

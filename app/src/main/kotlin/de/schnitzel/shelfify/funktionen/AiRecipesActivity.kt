@@ -1,7 +1,9 @@
 package de.schnitzel.shelfify.funktionen
 
 import android.os.Bundle
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -11,12 +13,15 @@ import de.schnitzel.shelfify.util.adapter.RecipeAdapter
 
 class AiRecipesActivity : AppCompatActivity() {
 
+    val btnSearch: Button = findViewById(R.id.btnSearch)
+
     private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_show_all)
+        btnSearch.isVisible = false
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
