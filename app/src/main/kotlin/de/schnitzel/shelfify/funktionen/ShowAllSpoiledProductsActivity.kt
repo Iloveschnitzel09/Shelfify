@@ -44,16 +44,15 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
         builder.setView(numberPicker)
 
         builder.setPositiveButton(
-            "OK",
-            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
-                val selectedDays = numberPicker.value
-                loadSpoiledProducts(selectedDays, btnSearch, etSearch)
-            })
+            "OK"
+        ) { _, _ ->
+            val selectedDays = numberPicker.value
+            loadSpoiledProducts(selectedDays, btnSearch, etSearch)
+        }
 
         builder.setNegativeButton(
-            "Abbrechen",
-            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int -> dialog!!.cancel() }
-        )
+            "Abbrechen"
+        ) { dialog: DialogInterface?, _ -> dialog!!.cancel() }
 
         builder.show()
     }

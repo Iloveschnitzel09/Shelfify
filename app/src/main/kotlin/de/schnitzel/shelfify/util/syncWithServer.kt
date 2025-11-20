@@ -1,6 +1,5 @@
 package de.schnitzel.shelfify.util
 
-import android.content.Context
 import android.util.Log
 import androidx.core.content.edit
 import com.android.identity.util.UUID

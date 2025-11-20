@@ -2,7 +2,6 @@ package de.schnitzel.shelfify.util.adapter
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.text.InputType
@@ -13,9 +12,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
@@ -132,7 +129,7 @@ class ProductAdapter(private val productList: List<Products>) :
 
 
                 val renameRequest = Request.Builder()
-                    .url("$BASE_URL/addProduct")
+                    .url("$BASE_URL/renameProduct")
                     .post(renameFormBody)
                     .build()
 

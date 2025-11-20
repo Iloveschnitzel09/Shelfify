@@ -12,7 +12,6 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.Patterns
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -21,27 +20,27 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.inviteGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.joinGroup
 import de.schnitzel.shelfify.funktionen.sub.DatagroupService.leaveGroup
 import de.schnitzel.shelfify.prefs
+import de.schnitzel.shelfify.util.adapter.MemberAdapter
 import de.schnitzel.shelfify.util.disableButton
 import de.schnitzel.shelfify.util.syncWithServer
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import androidx.core.view.isVisible
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import de.schnitzel.shelfify.util.adapter.MemberAdapter
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -148,7 +147,7 @@ class SettingsActivity : AppCompatActivity() {
         btnRequestCode.setOnClickListener {
             email = prefs.getString("email", "null") ?: "null"
             if (email != "null" || token != "null") {
-                requestVerificationCode(email, token, prefs)
+                requestVerificationCode(email, token)
             } else {
                 Toast.makeText(this, "Bitte gültige E-Mail-Adresse speichern", Toast.LENGTH_SHORT)
                     .show()
@@ -165,7 +164,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        switchNotifications.setOnClickListener { buttonView ->
+        switchNotifications.setOnClickListener { _ ->
             if (prefs.getBoolean("verify", false)) {
                 setNotificationPreference(email, true, token, prefs)
                 prefs.edit { putBoolean("verify", true) }
@@ -257,7 +256,7 @@ class SettingsActivity : AppCompatActivity() {
         }.start() // Ende Thread
     }
 
-    private fun requestVerificationCode(email: String, token: String, prefs: SharedPreferences) {
+    private fun requestVerificationCode(email: String, token: String) {
         Thread {
             try {
                 val conn = URL(
@@ -522,27 +521,24 @@ class SettingsActivity : AppCompatActivity() {
 
         builder.setPositiveButton(
 
-            "OK",
-            DialogInterface.OnClickListener {
-                dialog: DialogInterface?, which: Int ->
-                if(pos){
-                    pos = false
+            "OK"
+        ) { _,_ ->
+            if (pos) {
+                pos = false
 
-                    delete()
-                } else {
-                    builder.setMessage("Wirklich sicher?")
-                    builder.show()
-                    pos = true
-                }
-
+                delete()
+            } else {
+                builder.setMessage("Wirklich sicher?")
+                builder.show()
+                pos = true
             }
-        )
 
-        builder.setNegativeButton("Abbrechen",
-            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
-                dialog!!.cancel()
-            }
-        )
+        }
+
+        builder.setNegativeButton("Abbrechen"
+        ) { dialog: DialogInterface?, _ ->
+            dialog!!.cancel()
+        }
 
         builder.show()
     }

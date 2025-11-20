@@ -11,10 +11,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
-import de.schnitzel.shelfify.funktionen.SettingsActivity
 import de.schnitzel.shelfify.prefs
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -57,7 +54,7 @@ class MemberAdapter(
                     (holder.itemView.context as Activity).runOnUiThread {
                         Toast.makeText(holder.itemView.context, "$email wurde entfernt", Toast.LENGTH_SHORT).show()
                         (members as MutableList).remove(email)
-                        notifyItemRemoved(holder.adapterPosition)
+                        notifyItemRemoved(holder.absoluteAdapterPosition)
 
                     }
                 } else {
