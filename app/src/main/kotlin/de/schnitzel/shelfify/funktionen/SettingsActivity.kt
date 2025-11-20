@@ -148,7 +148,7 @@ class SettingsActivity : AppCompatActivity() {
         btnRequestCode.setOnClickListener {
             email = prefs.getString("email", "null") ?: "null"
             if (email != "null" || token != "null") {
-                requestVerificationCode(email, token, prefs)
+                requestVerificationCode(email, token)
             } else {
                 Toast.makeText(this, "Bitte gültige E-Mail-Adresse speichern", Toast.LENGTH_SHORT)
                     .show()
@@ -165,7 +165,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        switchNotifications.setOnClickListener { buttonView ->
+        switchNotifications.setOnClickListener { _ ->
             if (prefs.getBoolean("verify", false)) {
                 setNotificationPreference(email, true, token, prefs)
                 prefs.edit { putBoolean("verify", true) }
@@ -257,7 +257,7 @@ class SettingsActivity : AppCompatActivity() {
         }.start() // Ende Thread
     }
 
-    private fun requestVerificationCode(email: String, token: String, prefs: SharedPreferences) {
+    private fun requestVerificationCode(email: String, token: String) {
         Thread {
             try {
                 val conn = URL(
@@ -557,27 +557,24 @@ class SettingsActivity : AppCompatActivity() {
 
         builder.setPositiveButton(
 
-            "OK",
-            DialogInterface.OnClickListener {
-                dialog: DialogInterface?, which: Int ->
-                if(pos){
-                    pos = false
+            "OK"
+        ) { _,_ ->
+            if (pos) {
+                pos = false
 
-                    delete()
-                } else {
-                    builder.setMessage("Wirklich sicher?")
-                    builder.show()
-                    pos = true
-                }
-
+                delete()
+            } else {
+                builder.setMessage("Wirklich sicher?")
+                builder.show()
+                pos = true
             }
-        )
 
-        builder.setNegativeButton("Abbrechen",
-            DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
-                dialog!!.cancel()
-            }
-        )
+        }
+
+        builder.setNegativeButton("Abbrechen"
+        ) { dialog: DialogInterface?, _ ->
+            dialog!!.cancel()
+        }
 
         builder.show()
     }

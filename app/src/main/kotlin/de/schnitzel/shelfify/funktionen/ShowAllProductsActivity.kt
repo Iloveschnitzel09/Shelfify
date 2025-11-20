@@ -44,25 +44,26 @@ class ShowAllProductsActivity : AppCompatActivity() {
             products = productRequest(request, client)
 
             val data = ProductAdapter(products ?: emptyList())
+
             runOnUiThread {
                 recyclerView.adapter = data
             }
         }.start()
 
         btnSearch.setOnClickListener {
-            val prolist : MutableList<Products> = mutableListOf()
+            val productList : MutableList<Products> = mutableListOf()
             val searchTerm = etSearch.text.toString().lowercase()
             for (product in products ?: emptyList()) {
                 if (product.produktname.lowercase().contains(searchTerm)) {
-                   prolist.add(product)
+                   productList.add(product)
                 }
             }
 
-            if (prolist.isEmpty()) {
+            if (productList.isEmpty()) {
                 Toast.makeText(this, "Produkt nicht gefunden!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val data = ProductAdapter(prolist)
+            val data = ProductAdapter(productList)
             runOnUiThread {
                 recyclerView.adapter = data
             }

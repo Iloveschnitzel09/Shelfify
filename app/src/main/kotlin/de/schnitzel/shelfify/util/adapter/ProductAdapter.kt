@@ -1,18 +1,27 @@
 package de.schnitzel.shelfify.util.adapter
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
+import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
+import de.schnitzel.shelfify.prefs
 import de.schnitzel.shelfify.util.Products
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
@@ -21,6 +30,8 @@ import java.util.Locale
 
 class ProductAdapter(private val productList: List<Products>) :
     RecyclerView.Adapter<ProductAdapter.ViewHolder>() {
+
+    private val client = OkHttpClient()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
@@ -62,6 +73,29 @@ class ProductAdapter(private val productList: List<Products>) :
                 }
             }
 
+            holder.sectionProduct.setOnClickListener {
+                val ctx = holder.itemView.context
+                val input = EditText(ctx).apply {
+                    inputType = InputType.TYPE_CLASS_TEXT
+                    setText(item.produktname)
+                    setSelection(text.length)
+                }
+
+                val dialog = AlertDialog.Builder(ctx)
+                    .setTitle("Produkt umbenennen")
+                    .setView(input)
+                    .setPositiveButton("Umbenennen") { _, _ ->
+                        val newName = input.text.toString().trim()
+                        if (newName.isNotEmpty() && newName != item.produktname) {
+                            renameProduct(item.produktname, newName, holder)
+                        }
+                    }
+                    .setNegativeButton("Abbrechen", null)
+                    .create()
+
+                dialog.show()
+            }
+
         } catch (e: Exception) {
             Log.e("ProductAdapter", e.stackTrace.toString())
             holder.tvAblaufdatum.text = "Ablauf: Unbekannt"
@@ -77,5 +111,59 @@ class ProductAdapter(private val productList: List<Products>) :
         val tvProduktname: TextView = itemView.findViewById(R.id.tvProductname)
         val tvMenge: TextView = itemView.findViewById(R.id.tvTime)
         val tvAblaufdatum: TextView = itemView.findViewById(R.id.tvAblaufdatum)
+        val sectionProduct: LinearLayout = itemView.findViewById(R.id.sectionProduct)
+    }
+
+    fun renameProduct(oldName: String, newName: String, holder: ViewHolder) {
+        Thread {
+            try {
+                val token = prefs.getString("token", "null")
+                val id = prefs.getInt("app_id", -1)
+
+                val renameFormBody = FormBody.Builder()
+                    .add("oldName", oldName)
+                    .add("newName", newName)
+                    .add("id", id.toString())
+                    .add("token", token ?: "")
+                    .build()
+
+
+                val renameRequest = Request.Builder()
+                    .url("$BASE_URL/renameProduct")
+                    .post(renameFormBody)
+                    .build()
+
+                client.newCall(renameRequest).execute().use { response ->
+                    val ctx = holder.itemView.context
+                    holder.itemView.post {
+                        when (response.code) {
+                            200 -> {
+                                Toast.makeText(
+                                    ctx,
+                                    "Produkt erfolgreich umbenannt",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                holder.tvProduktname.text = newName
+                            }
+
+                            409 -> Toast.makeText(
+                                ctx,
+                                "Produktname oder EAN existiert bereits",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            else -> Toast.makeText(
+                                ctx,
+                                "Fehler beim Umbenennen: ${response.code}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ProductAdapter", e.stackTrace.toString())
+            }
+        }.start()
     }
 }

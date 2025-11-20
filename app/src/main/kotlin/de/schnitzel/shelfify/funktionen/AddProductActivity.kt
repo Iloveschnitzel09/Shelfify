@@ -29,7 +29,6 @@ class AddProductActivity : AppCompatActivity() {
     private lateinit var editTextProductName: EditText
     private lateinit var editTextDate: EditText
     private lateinit var etQuantity : EditText
-    private var selectedQuantity = 1
     private var addEan = false
     private val client = OkHttpClient()
 
@@ -64,7 +63,7 @@ class AddProductActivity : AppCompatActivity() {
             barcodeLauncher.launch(intent)
         }
 
-        editTextEan.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
+        editTextEan.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) barcodeLauncher.launch(intent)
         }
 
@@ -112,7 +111,7 @@ class AddProductActivity : AppCompatActivity() {
         dayPicker.maxValue = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
         dayPicker.value = currentDay
 
-        val dateChangeListener = NumberPicker.OnValueChangeListener { picker, oldVal, newVal ->
+        val dateChangeListener = NumberPicker.OnValueChangeListener { _, _, _ ->
             val year = yearPicker.value
             val month = monthPicker.value
             val tempCal = Calendar.getInstance()
@@ -131,7 +130,7 @@ class AddProductActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Ablaufdatum wählen")
             .setView(layout)
-            .setPositiveButton("OK") { dialog, which ->
+            .setPositiveButton("OK") { _, _ ->
                 val day = dayPicker.value
                 val month = monthPicker.value
                 val year = yearPicker.value
@@ -155,10 +154,10 @@ class AddProductActivity : AppCompatActivity() {
                     .build()
 
                 client.newCall(request).execute().use { response ->
+                    val bodyString = response.body?.string() ?: ""
                     if (response.isSuccessful) {
-                        val name = response.body?.string() ?: ""
                         runOnUiThread {
-                            editTextProductName.setText(name)
+                            editTextProductName.setText(bodyString)
                             Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
                             editTextProductName.isEnabled = false
                             addEan = false
