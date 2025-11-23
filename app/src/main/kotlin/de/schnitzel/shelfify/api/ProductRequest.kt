@@ -12,6 +12,7 @@ fun productRequest(request: Request, client: OkHttpClient): List<Products>? {
     try {
         val response = client.newCall(request).execute()
         if (response.isSuccessful) {
+            Log.i("bode", response.toString())
             val jsonResponse = response.body?.string()
             val listType = object : TypeToken<List<Products>>() {}.type
             val products = Gson().fromJson<List<Products>>(jsonResponse, listType)

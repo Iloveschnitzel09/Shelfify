@@ -54,7 +54,7 @@ class ShowAllProductsActivity : AppCompatActivity() {
             val productList : MutableList<Products> = mutableListOf()
             val searchTerm = etSearch.text.toString().lowercase()
             for (product in products ?: emptyList()) {
-                if (product.produktname.lowercase().contains(searchTerm)) {
+                if (product.ean.lowercase().contains(searchTerm)) {
                    productList.add(product)
                 }
             }
