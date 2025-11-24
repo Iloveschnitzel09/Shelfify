@@ -504,9 +504,6 @@ class SettingsActivity : AppCompatActivity() {
 
                         recyclerView.layoutManager = LinearLayoutManager(this)
                         recyclerView.adapter = MemberAdapter(members, owner)
-
-                        val header = findViewById<TextView>(R.id.tvMemberHeader)
-                        header.text = "Mitglieder:"
                     }
                 }
             } else {
