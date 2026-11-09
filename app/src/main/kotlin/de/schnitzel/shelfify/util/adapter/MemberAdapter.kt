@@ -56,7 +56,7 @@ class MemberAdapter(
                             (holder.itemView.context as Activity).runOnUiThread {
                                 Toast.makeText(holder.itemView.context, "$email wurde entfernt", Toast.LENGTH_SHORT).show()
                                 (members as MutableList).remove(email)
-                                notifyItemRemoved(holder.adapterPosition)
+                                notifyItemRemoved(holder.absoluteAdapterPosition)
                             }
                         }
                         401 -> {

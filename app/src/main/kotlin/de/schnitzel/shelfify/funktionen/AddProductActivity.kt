@@ -218,7 +218,7 @@ class AddProductActivity : AppCompatActivity() {
                 }
 
                 val addProductBody = FormBody.Builder()
-                    .add("name", name)
+                    .add("ean", ean)
                     .add("ablaufdatum", datum)
                     .add("id", id.toString())
                     .add("token", token ?: "")

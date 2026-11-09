@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Build
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -44,7 +45,7 @@ class ProductAdapter(private val productList: List<Products>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = productList[position]
 
-        holder.tvProduktname.text = item.produktname
+        holder.tvProduktname.text = item.ean
         holder.tvMenge.text = "Menge: ${item.menge}"
 
         try {
@@ -77,7 +78,7 @@ class ProductAdapter(private val productList: List<Products>) :
                 val ctx = holder.itemView.context
                 val input = EditText(ctx).apply {
                     inputType = InputType.TYPE_CLASS_TEXT
-                    setText(item.produktname)
+                    setText(item.ean)
                     setSelection(text.length)
                 }
 
@@ -86,8 +87,8 @@ class ProductAdapter(private val productList: List<Products>) :
                     .setView(input)
                     .setPositiveButton("Umbenennen") { _, _ ->
                         val newName = input.text.toString().trim()
-                        if (newName.isNotEmpty() && newName != item.produktname) {
-                            renameProduct(item.produktname, newName, holder)
+                        if (newName.isNotEmpty() && newName != item.ean) {
+                            renameProduct(item.ean, newName, holder)
                         }
                     }
                     .setNegativeButton("Abbrechen", null)
@@ -97,7 +98,7 @@ class ProductAdapter(private val productList: List<Products>) :
             }
 
         } catch (e: Exception) {
-            Log.e("ProductAdapter", e.stackTrace.toString())
+            Log.e("ProductAdapter", e.message.toString())
             holder.tvAblaufdatum.text = "Ablauf: Unbekannt"
             holder.tvAblaufdatum.setTextColor(Color.GRAY)
         }

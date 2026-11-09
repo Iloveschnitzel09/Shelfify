@@ -60,7 +60,7 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
     private fun loadSpoiledProducts(days: Int, btnSearch: Button, etSearch: EditText) {
         val token = prefs.getString("token", "null")
         val id = prefs.getInt("app_id", -1)
-        val url = "${ApiConfig.BASE_URL}/spoiledProducts?days=$days&id=$id&token=$token"
+        val url = "${ApiConfig.BASE_URL}/products?id=$id&token=$token&days=$days"
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -83,7 +83,7 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
             val prolist : MutableList<Products> = mutableListOf()
             val searchTerm = etSearch.text.toString().lowercase()
             for (product in products ?: emptyList()) {
-                if (product.produktname.lowercase().contains(searchTerm)) {
+                if (product.ean.lowercase().contains(searchTerm)) {
                     prolist.add(product)
                 }
             }
