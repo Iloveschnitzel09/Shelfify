@@ -1,5 +1,11 @@
 import java.util.Properties
 
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
+}
+
 val versionPropsFile = file("version.properties")
 
 if (!versionPropsFile.exists()) {
@@ -9,36 +15,34 @@ if (!versionPropsFile.exists()) {
 val versionProps = Properties()
 versionProps.load(versionPropsFile.inputStream())
 
-var versionCode = versionProps.getProperty("VERSION_CODE").toInt()
-var versionName = versionProps.getProperty("VERSION_NAME")
+var nextVersionCode = versionProps.getProperty("VERSION_CODE").toInt()
+var nextVersionName: String = versionProps.getProperty("VERSION_NAME")
 
-// Bei jedem Build erhöhen:
-versionCode++
-val versionParts = versionName.split(".").toMutableList()
+nextVersionCode++
+val versionParts = nextVersionName.split(".").toMutableList()
 versionParts[versionParts.size - 1] = (versionParts.last().toInt() + 1).toString()
-versionName = versionParts.joinToString(".")
+nextVersionName = versionParts.joinToString(".")
 
-versionProps.setProperty("VERSION_CODE", versionCode.toString())
-versionProps.setProperty("VERSION_NAME", versionName)
+versionProps.setProperty("VERSION_CODE", nextVersionCode.toString())
+versionProps.setProperty("VERSION_NAME", nextVersionName)
 versionProps.store(versionPropsFile.outputStream(), null)
 
-plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.google.gms.google.services)
-    alias(libs.plugins.google.firebase.crashlytics)
-}
+// Eigene Namen für die Werte, damit sie im defaultConfig-Block nicht mit
+// den gleichnamigen Properties (versionCode/versionName) verwechselt werden
+val appVersionCode: Int = nextVersionCode
+val appVersionName: String = nextVersionName
 
-android {
+// 3. DER ANDROID BLOCK
+configure<com.android.build.api.dsl.ApplicationExtension> {
     namespace = "de.schnitzel.shelfify"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "de.schnitzel.shelfify"
         minSdk = 24
-        targetSdk = 36
-        versionCode = versionCode
-        versionName = versionName
+        targetSdk = 37
+        versionCode = appVersionCode
+        versionName = appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -65,14 +69,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
 }
 
-
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.camera.camera2)
