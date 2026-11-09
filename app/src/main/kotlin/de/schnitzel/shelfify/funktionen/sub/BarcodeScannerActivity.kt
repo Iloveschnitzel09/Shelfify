@@ -34,6 +34,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
     private var preview: Preview? = null
 
     private lateinit var btnFlash: Button
+    private lateinit var btnManualInput: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,9 +42,15 @@ class BarcodeScannerActivity : AppCompatActivity() {
 
         previewView = findViewById(R.id.previewView)
         btnFlash = findViewById(R.id.btnFlashlight)
+        btnManualInput = findViewById(R.id.btnManualInput)
 
         btnFlash.setOnClickListener { toggleFlashlight() }
-        btnFlash.isEnabled = false // deaktiviert, bis Kamera läuft
+        btnFlash.isEnabled = false
+
+        btnManualInput.setOnClickListener {
+            setResult(RESULT_CANCELED)
+            finish()
+        }
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             == PackageManager.PERMISSION_GRANTED
@@ -79,7 +86,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 cameraProvider = cameraProviderFuture.get()
                 bindPreviewAndAnalyzer()
             } catch (e: Exception) {
-                Log.e("BarcodeScanner", e.stackTrace.toString())
+                Log.e("BarcodeScanner", e.stackTrace.contentToString())
                 Toast.makeText(this, "Kamera konnte nicht gestartet werden", Toast.LENGTH_SHORT)
                     .show()
                 finish()
@@ -95,15 +102,12 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build()
 
-            // Vorherige Bindungen aufheben
             provider.unbindAll()
 
-            // Preview einrichten
             preview = Preview.Builder().build().apply {
                 surfaceProvider = previewView.surfaceProvider
             }
 
-            // Bildanalyse einrichten
             imageAnalysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
@@ -112,7 +116,6 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 processImageProxy(imageProxy)
             }
 
-            // Kamera an Lebenszyklus binden
             camera = provider.bindToLifecycle(
                 this,
                 cameraSelector,
@@ -120,13 +123,12 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 imageAnalysis
             )
 
-            // Taschenlampen-Button aktivieren
             btnFlash.isEnabled = true
             btnFlash.text = if (camera?.cameraInfo?.torchState?.value == TorchState.ON)
                 "🔦 Licht aus" else "🔦 Licht an"
 
         } catch (e: Exception) {
-            Log.e("BarcodeScanner", e.stackTrace.toString())
+            Log.e("BarcodeScanner", e.stackTrace.contentToString())
             Toast.makeText(this, "Kamera konnte nicht initialisiert werden", Toast.LENGTH_SHORT)
                 .show()
             finish()
@@ -152,7 +154,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { exception ->
                     imageProxy.close()
-                    Log.e("BarcodeScanner", exception.stackTrace.toString())
+                    Log.e("BarcodeScanner", exception.stackTrace.contentToString())
                     Toast.makeText(this, "Fehler beim Scannen", Toast.LENGTH_SHORT).show()
                 }
         } else {

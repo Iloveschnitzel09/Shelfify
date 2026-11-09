@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -13,10 +12,15 @@ import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.sub.BarcodeScannerActivity
 import de.schnitzel.shelfify.prefs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -26,62 +30,95 @@ import java.util.Locale
 class AddProductActivity : AppCompatActivity() {
 
     private lateinit var editTextEan: EditText
+    private lateinit var btnCheckEan: Button
     private lateinit var editTextProductName: EditText
     private lateinit var editTextDate: EditText
-    private lateinit var etQuantity : EditText
+    private lateinit var etQuantity: EditText
+    private lateinit var buttonAddProduct: Button
+
     private var addEan = false
     private val client = OkHttpClient()
 
-    private var barcodeLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK && result.data != null) {
-                val ean = result.data?.getStringExtra("ean")
+    private val barcodeLauncher =
+    registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            val ean = result.data?.getStringExtra("ean")
+
+            if (!ean.isNullOrEmpty()) {
                 editTextEan.setText(ean)
-                checkEan(ean.toString())
-                editTextProductName.isEnabled = false
-            } else {
-                editTextProductName.isEnabled = true
+                checkEan(ean)
             }
+        } else {
+            editTextEan.requestFocus()
         }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val intent = Intent(this, BarcodeScannerActivity::class.java)
-        barcodeLauncher.launch(intent)
-
         setContentView(R.layout.activity_addproduct)
 
+        initViews()
+        setupListeners()
+
+        if (savedInstanceState == null) {
+            startScannerOrFocus()
+        }
+    }
+
+    private fun initViews() {
         editTextEan = findViewById(R.id.etEan)
+        btnCheckEan = findViewById(R.id.btnCheckEan)
         editTextProductName = findViewById(R.id.etName)
         editTextDate = findViewById(R.id.etDate)
         etQuantity = findViewById(R.id.etQuantity)
-        val buttonAddProduct = findViewById<Button>(R.id.btnAddProduct)
+        buttonAddProduct = findViewById(R.id.btnAddProduct)
 
+        editTextProductName.isVisible = false
+    }
+
+    private fun setupListeners() {
         editTextDate.setOnClickListener { openCustomDatePicker() }
-        editTextEan.setOnClickListener {
-            barcodeLauncher.launch(intent)
-        }
 
-        editTextEan.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) barcodeLauncher.launch(intent)
+        btnCheckEan.setOnClickListener {
+            val ean = editTextEan.text.toString().trim()
+            if (ean.isNotEmpty()) {
+                checkEan(ean)
+            } else {
+                Toast.makeText(this, "Bitte EAN eingeben", Toast.LENGTH_SHORT).show()
+            }
         }
 
         buttonAddProduct.setOnClickListener {
-            val ean = editTextEan.text.toString()
-            val name = editTextProductName.text.toString()
-            val datum = editTextDate.text.toString()
-            var quantity = etQuantity.text.toString()
+            val ean = editTextEan.text.toString().trim()
+            val name = editTextProductName.text.toString().trim()
+            val datum = editTextDate.text.toString().trim()
+            var quantity = etQuantity.text.toString().trim()
+
             if (quantity.isEmpty()) quantity = "1"
 
-
-            if (ean.isEmpty() || datum.isEmpty() || name.isEmpty()) {
+            if (ean.isEmpty() || datum.isEmpty() || (editTextProductName.isVisible && name.isEmpty())) {
                 Toast.makeText(this, "Alle Felder ausfüllen", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             addNewProduct(ean, name, datum, addEan, quantity)
         }
+    }
+
+    private fun openScanner() {
+        val intent = Intent(this, BarcodeScannerActivity::class.java)
+        barcodeLauncher.launch(intent)
+    }
+
+    private fun resetAndRestart() {
+        editTextEan.text.clear()
+        editTextProductName.text.clear()
+        editTextDate.text.clear()
+        etQuantity.setText("1")
+
+        editTextProductName.isVisible = false
+
+        startScannerOrFocus()
     }
 
     private fun openCustomDatePicker() {
@@ -96,7 +133,7 @@ class AddProductActivity : AppCompatActivity() {
         layout.gravity = Gravity.CENTER
 
         val yearPicker = NumberPicker(this)
-        yearPicker.minValue = currentYear
+        yearPicker.minValue = currentYear - 10
         yearPicker.maxValue = currentYear + 20
         yearPicker.value = currentYear
 
@@ -105,7 +142,6 @@ class AddProductActivity : AppCompatActivity() {
         monthPicker.maxValue = 12
         monthPicker.value = currentMonth + 1
 
-        // Day Picker
         val dayPicker = NumberPicker(this)
         dayPicker.minValue = 1
         dayPicker.maxValue = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
@@ -114,10 +150,16 @@ class AddProductActivity : AppCompatActivity() {
         val dateChangeListener = NumberPicker.OnValueChangeListener { _, _, _ ->
             val year = yearPicker.value
             val month = monthPicker.value
+
             val tempCal = Calendar.getInstance()
             tempCal.set(Calendar.YEAR, year)
-            tempCal.set(Calendar.MONTH, month - 1) // 0-based!
+            tempCal.set(Calendar.MONTH, month - 1)
+            tempCal.set(Calendar.DAY_OF_MONTH, 1)
+
             val maxDay = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
+            if (dayPicker.value > maxDay) {
+                dayPicker.value = maxDay
+            }
             dayPicker.maxValue = maxDay
         }
         yearPicker.setOnValueChangedListener(dateChangeListener)
@@ -143,114 +185,122 @@ class AddProductActivity : AppCompatActivity() {
     }
 
     private fun checkEan(ean: String) {
-        val token = prefs.getString("token", "null")
-        val id = prefs.getInt("app_id", -1)
-        val url = "${BASE_URL}/lookupProductName?ean=$ean&id=$id&token=$token"
+        val accessToken = prefs.getString("accessToken", "")
+        val url = "$BASE_URL/lookupProductName?ean=$ean"
 
-        Thread {
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $accessToken")
+            .build()
+
+        lifecycleScope.launch {
             try {
-                val request = Request.Builder()
-                    .url(url)
-                    .build()
+                val (isSuccessful, code, bodyString) = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response ->
+                        Triple(response.isSuccessful, response.code, response.body?.string() ?: "")
+                    }
+                }
 
-                client.newCall(request).execute().use { response ->
-                    val bodyString = response.body?.string() ?: ""
-                    if (response.isSuccessful) {
-                        runOnUiThread {
-                            editTextProductName.setText(bodyString)
-                            Toast.makeText(this, "Produktname gefunden", Toast.LENGTH_SHORT).show()
-                            editTextProductName.isEnabled = false
-                            addEan = false
-                        }
-                    } else {
-                        runOnUiThread {
-                            when (response.code) {
-                                404 -> Toast.makeText(this, "Produktname nicht gefunden – bitte eingeben", Toast.LENGTH_SHORT).show()
-                                502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
-                                else -> Toast.makeText(this, "Unerwarteter Fehler: ${response.code}", Toast.LENGTH_SHORT).show()
-                            }
-                            editTextProductName.isEnabled = true
-                            addEan = true
-                        }
+                editTextProductName.isVisible = true
+
+                if (isSuccessful) {
+                    editTextProductName.setText(bodyString)
+                    editTextProductName.isEnabled = false
+                    addEan = false
+                    Toast.makeText(this@AddProductActivity, "Produktname gefunden", Toast.LENGTH_SHORT).show()
+
+                } else {
+                    editTextProductName.text.clear()
+                    editTextProductName.isEnabled = true
+                    addEan = true
+
+                    when (code) {
+                        404 -> Toast.makeText(this@AddProductActivity, "Produktname nicht gefunden – bitte eintragen", Toast.LENGTH_SHORT).show()
+                        502 -> Toast.makeText(this@AddProductActivity, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                        else -> Toast.makeText(this@AddProductActivity, "Fehler: $code", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
-                Log.e("AddProduct", e.stackTrace.toString())
-                runOnUiThread {
-                    Toast.makeText(this, "Fehler beim Abrufen", Toast.LENGTH_SHORT).show()
-                }
+                Log.e("AddProduct", "Fehler beim Abrufen der EAN", e)
+                Toast.makeText(this@AddProductActivity, "Fehler beim Abrufen", Toast.LENGTH_SHORT).show()
             }
-        }.start()
+        }
     }
 
     private fun addNewProduct(ean: String, name: String, datum: String, add: Boolean, quantity: String) {
-        Thread {
+        val accessToken = prefs.getString("accessToken", "")
+        lifecycleScope.launch {
             try {
-                val token = prefs.getString("token", "null")
-                val id = prefs.getInt("app_id", -1)
-
                 if (add) {
                     val eanFormBody = FormBody.Builder()
                         .add("ean", ean)
-                        .add("name", name)
-                        .add("id", id.toString())
-                        .add("token", token ?: "")
+                        .add("productName", name)
                         .build()
 
                     val eanRequest = Request.Builder()
-                        .url("$BASE_URL/addEAN")
+                        .url("$BASE_URL/addEan")
+                        .addHeader("Authorization", "Bearer $accessToken")
                         .post(eanFormBody)
                         .build()
 
-                    client.newCall(eanRequest).execute().use { response ->
-                        if (!response.isSuccessful) {
-                            runOnUiThread {
-                                when (response.code) {
-                                    400 -> Toast.makeText(this, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT).show()
-                                    409 -> Toast.makeText(this, "Name schon vorhanden", Toast.LENGTH_SHORT).show()
-                                    502 -> Toast.makeText(this, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
-                                    else -> Toast.makeText(this, "Unerwarteter Fehler: ${response.code}", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            return@Thread
+                    val (isSuccessful, eanCode) = withContext(Dispatchers.IO) {
+                        client.newCall(eanRequest).execute().use { response ->
+                            Pair(response.isSuccessful, response.code)
                         }
+                    }
+
+                    if (!isSuccessful) {
+                        when (eanCode) {
+                            400 -> Toast.makeText(this@AddProductActivity, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT).show()
+                            409 -> Toast.makeText(this@AddProductActivity, "Name schon vorhanden", Toast.LENGTH_SHORT).show()
+                            502 -> Toast.makeText(this@AddProductActivity, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                            else -> {
+                                Toast.makeText(this@AddProductActivity, "Unerwarteter EAN Fehler: $eanCode", Toast.LENGTH_SHORT).show()
+                                Log.e("AddProduct", "Unerwarteter Fehler: $eanCode$accessToken")
+                            }
+                        }
+                        return@launch
                     }
                 }
 
                 val addProductBody = FormBody.Builder()
                     .add("ean", ean)
                     .add("ablaufdatum", datum)
-                    .add("id", id.toString())
-                    .add("token", token ?: "")
                     .add("quantity", quantity)
                     .build()
 
                 val addProductRequest = Request.Builder()
                     .url("$BASE_URL/addProduct")
+                    .addHeader("Authorization", "Bearer $accessToken")
                     .post(addProductBody)
                     .build()
 
-                client.newCall(addProductRequest).execute().use { response ->
-                    val responseCode = response.code
-                    runOnUiThread {
-                        when (responseCode) {
-                            200 -> {
-                                Toast.makeText(this, "Produkt hinzugefügt", Toast.LENGTH_SHORT).show()
-                                editTextEan.text.clear()
-                                editTextProductName.text.clear()
-                                editTextDate.text.clear()
-                            }
-                            409 -> Toast.makeText(this, "Produktname oder EAN existiert bereits", Toast.LENGTH_SHORT).show()
-                            else -> Toast.makeText(this, "Fehler beim Hinzufügen (Code: $responseCode)", Toast.LENGTH_SHORT).show()
-                        }
+                val responseCode = withContext(Dispatchers.IO) {
+                    client.newCall(addProductRequest).execute().use { response ->
+                        response.code
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("AddProduct",  e.stackTrace.toString())
-                runOnUiThread {
-                    Toast.makeText(this, "Fehler beim hinzufügen", Toast.LENGTH_SHORT).show()
+
+                when (responseCode) {
+                    200 -> {
+                        Toast.makeText(this@AddProductActivity, "Produkt hinzugefügt", Toast.LENGTH_SHORT).show()
+                        resetAndRestart()
+                    }
+                    409 -> Toast.makeText(this@AddProductActivity, "Produktname oder EAN existiert bereits", Toast.LENGTH_SHORT).show()
+                    else -> Toast.makeText(this@AddProductActivity, "Fehler beim Hinzufügen (Code: $responseCode)", Toast.LENGTH_SHORT).show()
                 }
+            } catch (e: Exception) {
+                Log.e("AddProduct", "Fehler beim Hinzufügen des Produkts", e)
+                Toast.makeText(this@AddProductActivity, "Fehler beim Hinzufügen", Toast.LENGTH_SHORT).show()
             }
-        }.start()
+        }
+    }
+
+    private fun startScannerOrFocus() {
+        if (prefs.getBoolean("start_with_scanner", true)) {
+            openScanner()
+        } else {
+            editTextEan.requestFocus()
+        }
     }
 }

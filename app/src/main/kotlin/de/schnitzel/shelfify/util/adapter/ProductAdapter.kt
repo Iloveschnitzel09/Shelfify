@@ -45,7 +45,7 @@ class ProductAdapter(private val productList: List<Products>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = productList[position]
 
-        holder.tvProduktname.text = item.ean
+        holder.tvProduktname.text = item.name
         holder.tvMenge.text = "Menge: ${item.menge}"
 
         try {
@@ -78,7 +78,7 @@ class ProductAdapter(private val productList: List<Products>) :
                 val ctx = holder.itemView.context
                 val input = EditText(ctx).apply {
                     inputType = InputType.TYPE_CLASS_TEXT
-                    setText(item.ean)
+                    setText(item.name)
                     setSelection(text.length)
                 }
 
@@ -87,8 +87,8 @@ class ProductAdapter(private val productList: List<Products>) :
                     .setView(input)
                     .setPositiveButton("Umbenennen") { _, _ ->
                         val newName = input.text.toString().trim()
-                        if (newName.isNotEmpty() && newName != item.ean) {
-                            renameProduct(item.ean, newName, holder)
+                        if (newName.isNotEmpty() && newName != item.name) {
+                            renameProduct(item.name, newName, holder)
                         }
                     }
                     .setNegativeButton("Abbrechen", null)
@@ -163,7 +163,7 @@ class ProductAdapter(private val productList: List<Products>) :
                     }
                 }
             } catch (e: Exception) {
-                Log.e("ProductAdapter", e.stackTrace.toString())
+                Log.e("ProductAdapter", e.stackTrace.contentToString())
             }
         }.start()
     }
