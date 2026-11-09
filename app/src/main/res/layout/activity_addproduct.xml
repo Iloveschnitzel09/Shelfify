@@ -15,26 +15,43 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="Product Informationen"
+            android:text="@string/product_informationen"
             android:textColor="@color/teal_700"
-            android:textSize="25dp" />
+            android:textSize="25sp" />
 
-        <EditText
-            android:id="@+id/etEan"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/ean_eingeben"
-            android:inputType="number"
-            android:textColor="@color/teal_200"
-            android:textColorHint="#AAAAAA"
-            android:backgroundTint="@color/teal_200"
-            android:layout_marginBottom="12dp"/>
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:id="@+id/etEan"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/ean_eingeben"
+                android:inputType="number"
+                android:textColor="@color/teal_200"
+                android:textColorHint="#AAAAAA"
+                android:backgroundTint="@color/teal_200" />
+
+            <Button
+                android:id="@+id/btnCheckEan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Prüfen"
+                android:backgroundTint="@color/teal_200"
+                android:textColor="@color/teal_700" />
+        </LinearLayout>
 
         <EditText
             android:id="@+id/etName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Produktname"
+            android:inputType="text"
             android:textColor="@color/teal_200"
             android:textColorHint="#AAAAAA"
             android:backgroundTint="@color/teal_200"
@@ -45,6 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Ablaufdatum auswählen"
+            android:inputType="date"
             android:focusable="false"
             android:textColor="@color/teal_200"
             android:textColorHint="#AAAAAA"
@@ -54,8 +72,7 @@
         <EditText
             android:id="@+id/etQuantity"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:backgroundTint="@color/teal_200"
             android:hint="Menge (Optional)"
             android:importantForAutofill="no"
@@ -63,7 +80,6 @@
             android:textColor="@color/teal_200"
             android:textColorHint="#AAAAAA"
             android:layout_marginBottom="24dp"/>
-
 
         <Button
             android:id="@+id/btnAddProduct"

@@ -11,8 +11,6 @@ import de.schnitzel.shelfify.funktionen.RemoveProductActivity
 import de.schnitzel.shelfify.funktionen.SettingsActivity
 import de.schnitzel.shelfify.funktionen.ShowAllProductsActivity
 import de.schnitzel.shelfify.funktionen.ShowAllSpoiledProductsActivity
-import de.schnitzel.shelfify.util.disableButton
-import de.schnitzel.shelfify.util.syncWithServer
 
 lateinit var prefs: SharedPreferences
 
@@ -23,29 +21,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
 
-        // App-Synchronisation beim Start
-        syncWithServer()
-
-        // Buttons aus Layout
-        val btnShowAll: Button = findViewById(R.id.btnShowAllProducts)
-        val btnSearch: Button = findViewById(R.id.btnSearchSpoiledProducts)
-        val btnAdd: Button = findViewById(R.id.btnAddProduct)
-        val btnRemove: Button = findViewById(R.id.btnRemoveProduct)
-        val btnSettings: Button = findViewById(R.id.btnSettings)
-        val btnRecipes: Button = findViewById(R.id.btnRecipes)
-        val btnSync: Button = findViewById(R.id.btnSync)
-
-        // Klick-Events
-        btnShowAll.setOnClickListener { startActivity(Intent(this, ShowAllProductsActivity::class.java)) }
-        btnSearch.setOnClickListener { startActivity(Intent(this, ShowAllSpoiledProductsActivity::class.java)) }
-        btnAdd.setOnClickListener { startActivity(Intent(this, AddProductActivity::class.java)) }
-        btnRemove.setOnClickListener { startActivity(Intent(this, RemoveProductActivity::class.java)) }
-        btnRecipes.setOnClickListener { startActivity(Intent(this, AiRecipesActivity::class.java)) }
-        btnSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
-
-        btnSync.setOnClickListener {
-            disableButton(btnSync, null, "↻", 5)
-            syncWithServer()
-        }
+        findViewById<Button>(R.id.btnShowAllProducts).setOnClickListener { startActivity(Intent(this, ShowAllProductsActivity::class.java)) }
+        findViewById<Button>(R.id.btnSearchSpoiledProducts).setOnClickListener { startActivity(Intent(this, ShowAllSpoiledProductsActivity::class.java)) }
+        findViewById<Button>(R.id.btnAddProduct).setOnClickListener { startActivity(Intent(this, AddProductActivity::class.java)) }
+        findViewById<Button>(R.id.btnRemoveProduct).setOnClickListener { startActivity(Intent(this, RemoveProductActivity::class.java)) }
+        findViewById<Button>(R.id.btnRecipes).setOnClickListener { startActivity(Intent(this, AiRecipesActivity::class.java)) }
+        findViewById<Button>(R.id.btnSettings).setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
     }
 }

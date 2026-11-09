@@ -33,7 +33,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
-                    android:text="E-Mail Einstellungen"
+                    android:text="@string/e_mail_einstellungen"
                     android:textColor="@color/teal_700"
                     android:textSize="16sp"
                     android:textStyle="bold"/>
@@ -60,7 +60,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:backgroundTint="@color/teal_200"
-                        android:hint="E-Mail-Adresse eingeben"
+                        android:hint="@string/e_mail_adresse_eingeben"
                         android:importantForAutofill="yes"
                         android:inputType="textEmailAddress"
                         android:textColor="@color/teal_200"
@@ -71,7 +71,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:backgroundTint="@color/teal_200"
-                        android:text="E-Mail speichern"
+                        android:text="@string/e_mail_speichern"
                         android:textColor="@color/teal_700" />
 
                 </LinearLayout>
@@ -98,7 +98,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
-                    android:text="Verifizierung"
+                    android:text="@string/verifizierung"
                     android:textColor="@color/teal_700"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -130,7 +130,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Verifizierungsstatus: Nicht verifiziert"
+                        android:text="@string/verifizierungsstatus_nicht_verifiziert"
                         android:textColor="@color/teal_200"/>
 
                     <LinearLayout
@@ -145,7 +145,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:backgroundTint="@color/teal_200"
-                            android:hint="Verifizierungscode"
+                            android:hint="@string/verifizierungscode"
                             android:inputType="number"
                             android:maxLength="6"
                             android:textColor="@color/teal_200"
@@ -157,7 +157,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:backgroundTint="@color/teal_200"
-                            android:text="Verifizieren"
+                            android:text="@string/verifizieren"
                             android:textColor="@color/teal_700" />
                     </LinearLayout>
 
@@ -167,7 +167,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:backgroundTint="@color/teal_200"
-                        android:text="Verifizierungscode anfordern"
+                        android:text="@string/verifizierungscode_anfordern"
                         android:textColor="@color/teal_700" />
                 </LinearLayout>
             </LinearLayout>
@@ -446,6 +446,13 @@
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
+        <TextView
+        android:id="@+id/textViewVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="12sp" />
     </LinearLayout>
 </ScrollView>

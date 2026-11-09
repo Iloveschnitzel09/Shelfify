@@ -1,10 +1,18 @@
 <resources>
-    <string name="app_name">Shelfify</string>
-    <string name="produkte_werden_geladen">Produkte werden geladen...</string>
+    <string name="app_name" translatable="false">Shelfify</string>
     <string name="ean_eingeben">EAN eingeben</string>
     <string name="hint_datagroup_1">Hinweis: Wenn Sie eine Gruppe verlassen, verlieren Sie den Zugriff auf die gemeinsamen Lebensmitteldaten.</string>
     <string name="hint_datagroup_0">Laden Sie Familienmitglieder oder Mitbewohner ein, um gemeinsam Lebensmittel zu verwalten und Benachrichtigungen zu teilen.</string>
     <string name="hint_email">Hier können Sie die E-Mail-Adresse eingeben, an die Sie Benachrichtigungen über ablaufende Lebensmittel erhalten möchten.</string>
     <string name="hint_verify">Verifizieren Sie Ihre E-Mail-Adresse, um sicherzustellen, dass Sie alle Benachrichtigungen erhalten.</string>
     <string name="hint_deletion">Wenn du deine Daten löschst werden sie überall entfernt, sie sind nicht wieder herstellbar.</string>
+    <string name="product_informationen">Product Informationen</string>
+    <string name="e_mail_speichern">E-Mail speichern</string>
+    <string name="e_mail_adresse_eingeben">E-Mail-Adresse eingeben</string>
+    <string name="verifizierung">Verifizierung</string>
+    <string name="verifizierungsstatus_nicht_verifiziert">Verifizierungsstatus: Nicht verifiziert</string>
+    <string name="e_mail_einstellungen">E-Mail Einstellungen</string>
+    <string name="verifizierungscode">Verifizierungscode</string>
+    <string name="verifizieren">Verifizieren</string>
+    <string name="verifizierungscode_anfordern">Verifizierungscode anfordern</string>
 </resources>
