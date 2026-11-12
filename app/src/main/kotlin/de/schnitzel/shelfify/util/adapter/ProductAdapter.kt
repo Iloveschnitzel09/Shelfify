@@ -3,7 +3,6 @@ package de.schnitzel.shelfify.util.adapter
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.graphics.Color
-import android.os.Build
 import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,13 +12,17 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.prefs
 import de.schnitzel.shelfify.util.Products
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -40,7 +43,6 @@ class ProductAdapter(private val productList: List<Products>) :
         return ViewHolder(view)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = productList[position]
@@ -115,56 +117,43 @@ class ProductAdapter(private val productList: List<Products>) :
         val sectionProduct: LinearLayout = itemView.findViewById(R.id.sectionProduct)
     }
 
-    fun renameProduct(oldName: String, newName: String, holder: ViewHolder) {
-        Thread {
+    private fun renameProduct(oldName: String, newName: String, holder: ViewHolder) {
+        val ctx = holder.itemView.context
+        // Die Activity ist der LifecycleOwner, der Request wird beim Schließen abgebrochen
+        val scope = (ctx as? LifecycleOwner)?.lifecycleScope ?: return
+        val accessToken = prefs.getString("accessToken", "")
+
+        val renameFormBody = FormBody.Builder()
+            .add("oldName", oldName)
+            .add("newName", newName)
+            .build()
+
+        val renameRequest = Request.Builder()
+            .url("$BASE_URL/renameProduct")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .put(renameFormBody)
+            .build()
+
+        scope.launch {
             try {
-                val token = prefs.getString("token", "null")
-                val id = prefs.getInt("app_id", -1)
+                val responseCode = withContext(Dispatchers.IO) {
+                    client.newCall(renameRequest).execute().use { response -> response.code }
+                }
 
-                val renameFormBody = FormBody.Builder()
-                    .add("oldName", oldName)
-                    .add("newName", newName)
-                    .add("id", id.toString())
-                    .add("token", token ?: "")
-                    .build()
-
-
-                val renameRequest = Request.Builder()
-                    .url("$BASE_URL/renameProduct")
-                    .post(renameFormBody)
-                    .build()
-
-                client.newCall(renameRequest).execute().use { response ->
-                    val ctx = holder.itemView.context
-                    holder.itemView.post {
-                        when (response.code) {
-                            200 -> {
-                                Toast.makeText(
-                                    ctx,
-                                    "Produkt erfolgreich umbenannt",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                holder.tvProduktname.text = newName
-                            }
-
-                            409 -> Toast.makeText(
-                                ctx,
-                                "Produktname oder EAN existiert bereits",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            else -> Toast.makeText(
-                                ctx,
-                                "Fehler beim Umbenennen: ${response.code}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                        }
+                when (responseCode) {
+                    200 -> {
+                        Toast.makeText(ctx, "Produkt erfolgreich umbenannt", Toast.LENGTH_SHORT).show()
+                        holder.tvProduktname.text = newName
                     }
+
+                    409 -> Toast.makeText(ctx, "Produktname oder EAN existiert bereits", Toast.LENGTH_SHORT).show()
+
+                    else -> Toast.makeText(ctx, "Fehler beim Umbenennen: $responseCode", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Log.e("ProductAdapter", e.stackTrace.contentToString())
+                Log.e("ProductAdapter", "Fehler beim Umbenennen", e)
+                Toast.makeText(ctx, "Fehler beim Umbenennen", Toast.LENGTH_SHORT).show()
             }
-        }.start()
+        }
     }
 }

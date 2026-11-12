@@ -39,7 +39,7 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
 
     defaultConfig {
         applicationId = "de.schnitzel.shelfify"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 37
         versionCode = appVersionCode
         versionName = appVersionName

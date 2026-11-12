@@ -14,8 +14,8 @@ cameraView = "1.6.2"
 cameraLifecycle = "1.6.2"
 playServicesMlkitBarcodeScanning = "18.3.1"
 camerax = "1.6.2"
-firebaseCrashlytics = "21.0.1"
-googleGmsGoogleServices = "4.5.0"
+firebaseCrashlytics = "21.1.0"
+googleGmsGoogleServices = "4.6.0"
 googleFirebaseCrashlytics = "3.0.8"
 
 [libraries]

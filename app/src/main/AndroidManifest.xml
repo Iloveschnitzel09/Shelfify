@@ -8,9 +8,11 @@
         android:required="false"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
+        android:name=".ShelfifyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -28,6 +30,9 @@
         <activity android:name=".funktionen.RemoveProductActivity"/>
         <activity android:name=".funktionen.AiRecipesActivity"/>
         <activity android:name=".funktionen.SettingsActivity" />
+        <activity android:name=".funktionen.NoConnectionActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
         <activity android:name=".funktionen.sub.BarcodeScannerActivity" />
 
         <activity android:name=".MainActivity"

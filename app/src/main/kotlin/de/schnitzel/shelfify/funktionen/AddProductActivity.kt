@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import de.schnitzel.shelfify.R
+import de.schnitzel.shelfify.api.ApiClient
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.sub.BarcodeScannerActivity
 import de.schnitzel.shelfify.prefs
@@ -37,21 +38,21 @@ class AddProductActivity : AppCompatActivity() {
     private lateinit var buttonAddProduct: Button
 
     private var addEan = false
-    private val client = OkHttpClient()
+    private val client = ApiClient.client
 
     private val barcodeLauncher =
-    registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK && result.data != null) {
-            val ean = result.data?.getStringExtra("ean")
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                val ean = result.data?.getStringExtra("ean")
 
-            if (!ean.isNullOrEmpty()) {
-                editTextEan.setText(ean)
-                checkEan(ean)
+                if (!ean.isNullOrEmpty()) {
+                    editTextEan.setText(ean)
+                    checkEan(ean)
+                }
+            } else {
+                editTextEan.requestFocus()
             }
-        } else {
-            editTextEan.requestFocus()
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

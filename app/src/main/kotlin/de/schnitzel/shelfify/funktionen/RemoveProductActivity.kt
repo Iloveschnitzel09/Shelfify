@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import de.schnitzel.shelfify.R
+import de.schnitzel.shelfify.api.ApiClient
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.funktionen.sub.BarcodeScannerActivity
 import de.schnitzel.shelfify.prefs
@@ -27,7 +28,7 @@ class RemoveProductActivity : AppCompatActivity() {
     private lateinit var editTextQuantity: EditText
     private lateinit var buttonRemove: Button
 
-    private val client = OkHttpClient()
+    private val client = ApiClient.client
 
     private val barcodeLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
