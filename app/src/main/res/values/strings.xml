@@ -15,4 +15,8 @@
     <string name="verifizierungscode">Verifizierungscode</string>
     <string name="verifizieren">Verifizieren</string>
     <string name="verifizierungscode_anfordern">Verifizierungscode anfordern</string>
+    <string name="code_senden">Code senden</string>
+    <string name="code_eingeben_hint">Wir haben dir einen Code per E-Mail geschickt. Gib ihn hier ein:</string>
+    <string name="status_nicht_verifiziert">Nicht verifiziert</string>
+    <string name="status_verifiziert">✓ Verifiziert</string>
 </resources>

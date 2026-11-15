@@ -18,157 +18,150 @@
             android:id="@+id/tvEmailHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="6dp"
+            android:layout_marginBottom="16dp"
             app:cardBackgroundColor="#1E1E1E"
-            android:layout_marginBottom="16dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="12dp">
+                android:padding="16dp">
 
-                <TextView
+                <!-- Titel + Status in einer Zeile -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:text="@string/e_mail_einstellungen"
-                    android:textColor="@color/teal_700"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/e_mail_einstellungen"
+                        android:textColor="@color/teal_700"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvVerificationStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/status_nicht_verifiziert"
+                        android:textColor="#FFB74D"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/emailSection"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone"
                     android:paddingTop="8dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="12dp"
                         android:text="@string/hint_email"
                         android:textColor="@color/teal_100"
-                        android:textSize="14sp" />
+                        android:textSize="13sp" />
 
-                    <EditText
-                        android:id="@+id/etEmail"
+                    <!-- Schritt 1: E-Mail eingeben und Code anfordern -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilEmail"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:backgroundTint="@color/teal_200"
                         android:hint="@string/e_mail_adresse_eingeben"
-                        android:importantForAutofill="yes"
-                        android:inputType="textEmailAddress"
-                        android:textColor="@color/teal_200"
-                        android:textColorHint="#AAAAAA" />
+                        android:textColorHint="#AAAAAA"
+                        app:boxStrokeColor="@color/teal_200"
+                        app:hintTextColor="@color/teal_200">
 
-                    <Button
-                        android:id="@+id/btnSaveEmail"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:autofillHints="emailAddress"
+                            android:imeOptions="actionDone"
+                            android:importantForAutofill="yes"
+                            android:inputType="textEmailAddress"
+                            android:maxLines="1"
+                            android:textColor="@color/teal_200" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRequestCode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
                         android:backgroundTint="@color/teal_200"
-                        android:text="@string/e_mail_speichern"
-                        android:textColor="@color/teal_700" />
+                        android:text="@string/code_senden"
+                        android:textAllCaps="false"
+                        android:textColor="@color/teal_700"
+                        app:cornerRadius="8dp" />
 
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Abschnitt: Verifizierung -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/tvVerificationHeader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="6dp"
-            app:cardBackgroundColor="#1E1E1E"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:text="@string/verifizierung"
-                    android:textColor="@color/teal_700"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:id="@+id/verificationSection"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    android:paddingTop="8dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/hint_verify"
-                        android:textColor="@color/teal_100"
-                        android:layout_marginBottom="8dp"
-                        android:textSize="14sp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#444444"
-                        android:layout_marginBottom="8dp"/>
-
-                    <TextView
-                        android:id="@+id/tvVerificationStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/verifizierungsstatus_nicht_verifiziert"
-                        android:textColor="@color/teal_200"/>
-
+                    <!-- Schritt 2: erscheint erst nach dem Anfordern (Sichtbarkeit per Code) -->
                     <LinearLayout
                         android:id="@+id/verificationContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:layout_marginTop="20dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
 
-                        <EditText
-                            android:id="@+id/etVerificationCode"
-                            android:layout_width="0dp"
+                        <TextView
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:backgroundTint="@color/teal_200"
-                            android:hint="@string/verifizierungscode"
-                            android:inputType="number"
-                            android:maxLength="6"
-                            android:textColor="@color/teal_200"
-                            android:textColorHint="#AAAAAA" />
+                            android:layout_marginBottom="12dp"
+                            android:text="@string/code_eingeben_hint"
+                            android:textColor="@color/teal_100"
+                            android:textSize="13sp" />
 
-                        <Button
-                            android:id="@+id/btnVerify"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:backgroundTint="@color/teal_200"
-                            android:text="@string/verifizieren"
-                            android:textColor="@color/teal_700" />
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilCode"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="@string/verifizierungscode"
+                                android:textColorHint="#AAAAAA"
+                                app:boxStrokeColor="@color/teal_200"
+                                app:hintTextColor="@color/teal_200">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etVerificationCode"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:imeOptions="actionDone"
+                                    android:inputType="number"
+                                    android:maxLength="6"
+                                    android:maxLines="1"
+                                    android:textColor="@color/teal_200" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnVerify"
+                                android:layout_width="wrap_content"
+                                android:layout_height="56dp"
+                                android:layout_gravity="top"
+                                android:layout_marginStart="8dp"
+                                android:layout_marginTop="6dp"
+                                android:backgroundTint="@color/teal_200"
+                                android:text="@string/verifizieren"
+                                android:textAllCaps="false"
+                                android:textColor="@color/teal_700"
+                                app:cornerRadius="8dp" />
+                        </LinearLayout>
                     </LinearLayout>
-
-                    <Button
-                        android:id="@+id/btnRequestCode"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:backgroundTint="@color/teal_200"
-                        android:text="@string/verifizierungscode_anfordern"
-                        android:textColor="@color/teal_700" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

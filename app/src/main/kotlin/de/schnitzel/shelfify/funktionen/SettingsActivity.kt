@@ -49,11 +49,13 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import androidx.core.graphics.toColorInt
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var editTextEmail: EditText
     private lateinit var editTextVerificationCode: EditText
     private lateinit var tvVerificationStatus: TextView
+    private lateinit var verificationContainer: LinearLayout
 
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private lateinit var switchNotifications: Switch
@@ -77,6 +79,7 @@ class SettingsActivity : AppCompatActivity() {
         editTextEmail = findViewById(R.id.etEmail)
         editTextVerificationCode = findViewById(R.id.etVerificationCode)
         tvVerificationStatus = findViewById(R.id.tvVerificationStatus)
+        verificationContainer = findViewById(R.id.verificationContainer) // NEU
         switchNotifications = findViewById(R.id.switchNotifications)
         btnRequestCode = findViewById(R.id.btnRequestCode)
         btnVerify = findViewById(R.id.btnVerify)
@@ -87,10 +90,6 @@ class SettingsActivity : AppCompatActivity() {
         btnLeave = findViewById(R.id.btnLeave)
         btnDeleteData = findViewById(R.id.btnDelete)
 
-        val btnSaveEmail: Button = findViewById(R.id.btnSaveEmail)
-
-        val verifyHeader : MaterialCardView = findViewById(R.id.tvVerificationHeader)
-        val verifySection : LinearLayout = findViewById(R.id.verificationSection)
         val emailHeader : MaterialCardView = findViewById(R.id.tvEmailHeader)
         val emailSection : LinearLayout = findViewById(R.id.emailSection)
         val notifyHeader: MaterialCardView = findViewById(R.id.tvNotificationsHeader)
@@ -103,19 +102,12 @@ class SettingsActivity : AppCompatActivity() {
         val deleteSection: LinearLayout = findViewById(R.id.deleteSection)
 
 
-        var email = prefs.getString("email", "null") ?: "null"
+        var email: String
         val token = prefs.getString("token", "null") ?: "null"
 
         loadCurrentSettings()
 
         emailHeader.setOnClickListener { emailSection.isVisible = !emailSection.isVisible }
-        verifyHeader.setOnClickListener {
-            if (!prefs.getString("email", "null").equals("null")) {
-                verifySection.isVisible = !verifySection.isVisible
-            } else {
-                toast("E-Mail muss erst hinzugefügt werden")
-            }
-        }
         notifyHeader.setOnClickListener {
             if (prefs.getBoolean("verify", false)) {
                 notifySection.isVisible = !notifySection.isVisible
@@ -142,34 +134,28 @@ class SettingsActivity : AppCompatActivity() {
             deleteSection.isVisible = !deleteSection.isVisible
         }
 
-        btnSaveEmail.setOnClickListener {
+        // GEÄNDERT: E-Mail kommt jetzt direkt aus dem Eingabefeld, speichern gibt es nicht mehr
+        btnRequestCode.setOnClickListener {
             val etemail = editTextEmail.text.toString().trim()
             if (isValidEmail(etemail)) {
-                saveEmail(etemail, prefs)
+                requestVerificationCode(etemail)
             } else {
                 toast("Bitte gültige E-Mail-Adresse eingeben")
             }
         }
 
-        btnRequestCode.setOnClickListener {
-            email = prefs.getString("email", "null") ?: "null"
-            if (email != "null" || token != "null") {
-                requestVerificationCode(email, token)
-            } else {
-                toast("Bitte gültige E-Mail-Adresse speichern")
-            }
-        }
-
+        // GEÄNDERT: verifyCode braucht nur noch den Code
         btnVerify.setOnClickListener {
             val code = editTextVerificationCode.text.toString().trim()
             if (code.length == 6) {
-                verifyCode(email, code, token, prefs)
+                verifyCode(code)
             } else {
                 toast("Bitte gültigen 6-stelligen Code eingeben")
             }
         }
 
         switchNotifications.setOnClickListener { _ ->
+            email = prefs.getString("email", "null") ?: "null"
             if (prefs.getBoolean("verify", false)) {
                 setNotificationPreference(email, true, token, prefs)
                 prefs.edit { putBoolean("verify", true) }
@@ -225,121 +211,134 @@ class SettingsActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun loadCurrentSettings() {
-        Thread {
-            try {
-                // Email anzeigen
-                val email = prefs.getString("email", "null") ?: "null"
-                if (email != "null") {
-                    runOnUiThread { editTextEmail.setText(email) }
-                } else {
-                    runOnUiThread { editTextEmail.text.clear() }
-                }
-
-                // Verifizierungsstatus anzeigen
-                val verified = prefs.getBoolean("verify", false)
-                val notify = prefs.getBoolean("notify", false)
-                runOnUiThread {
-                    if (verified) {
-                        switchNotifications.isEnabled = true
-                        btnVerify.isEnabled = false
-                        btnRequestCode.isEnabled = false
-                        editTextVerificationCode.isEnabled = false
-                    } else {
-                        switchNotifications.isEnabled = false
-                        btnVerify.isEnabled = true
-                        btnRequestCode.isEnabled = true
-                        editTextVerificationCode.isEnabled = true
-                    }
-
-                    switchNotifications.isChecked = notify
-                    colorVerifyText(verified)
-                }
-            } catch (e: Exception) {
-                Log.e("SettingsActivity", e.stackTrace.contentToString())
+        lifecycleScope.launch {
+            val email = prefs.getString("email", "null") ?: "null"
+            val pendingEmail = prefs.getString("pendingEmail", null) // NEU
+            if (email != "null") {
+                editTextEmail.setText(email)
+            } else if (pendingEmail != null) {
+                editTextEmail.setText(pendingEmail)
+            } else {
+                editTextEmail.text.clear()
             }
-        }.start() // Ende Thread
+
+            // Verifizierungsstatus anzeigen
+            val verified = prefs.getBoolean("verify", false)
+            val notify = prefs.getBoolean("notify", false)
+
+            if (verified) {
+                switchNotifications.isEnabled = true
+                btnVerify.isEnabled = false
+                btnRequestCode.isEnabled = false
+                editTextVerificationCode.isEnabled = false
+            } else {
+                switchNotifications.isEnabled = false
+                btnVerify.isEnabled = true
+                btnRequestCode.isEnabled = true
+                editTextVerificationCode.isEnabled = true
+            }
+
+            switchNotifications.isChecked = notify
+            updateVerificationUi(verified)
+        }
     }
 
-    private fun requestVerificationCode(email: String, token: String) {
-        Thread {
-            try {
-                val conn = URL(
-                    "$BASE_URL/requestVerificode?email=${
-                        URLEncoder.encode(
-                            email,
-                            "UTF-8"
-                        )
-                    }&token=$token"
-                ).openConnection() as HttpURLConnection
-
-                disableButton(btnRequestCode, "Erneut senden in ", "Code erneut anfordern", 60)
-
-                conn.requestMethod = "POST"
-                val responseCode = conn.responseCode
-
-                runOnUiThread {
-                    when (responseCode) {
-                        200 -> {
-                            toast("Verifizierungscode wurde gesendet",)
-                            loadCurrentSettings()
-                        }
-                        401 -> {
-                            toast("Ungültige Anmeldedaten")
-                        }
-                        502 -> {
-                            toast("Netzwerkfehler")
-                        }
-                        else -> {
-                            toast("Fehler beim Senden des Codes: $responseCode")
-                        }
-                    }
-                }
-                conn.disconnect()
-            } catch (e: Exception) {
-                Log.e("SettingsActivity", e.stackTrace.contentToString())
-                runOnUiThread { toast("Netzwerkfehler") }
-            }
-        }.start()
+    private fun updateVerificationUi(verified: Boolean) {
+        if (verified) {
+            tvVerificationStatus.text = getString(R.string.status_verifiziert)
+            tvVerificationStatus.setTextColor("#81C784".toColorInt())
+        } else {
+            tvVerificationStatus.text = getString(R.string.status_nicht_verifiziert)
+            tvVerificationStatus.setTextColor("#FFB74D".toColorInt())
+        }
+        verificationContainer.isVisible = !verified && prefs.getBoolean("codeRequested", false)
     }
 
-    private fun verifyCode(email: String, code: String, token: String, prefs: SharedPreferences) {
-        Thread {
+    private fun requestVerificationCode(email: String) {
+        val accessToken = prefs.getString("accessToken", "")
+        val body = FormBody.Builder()
+            .add("email", email)
+            .build()
+        val request = Request.Builder()
+            .url("$BASE_URL/requestVerification")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .post(body)
+            .build()
+
+        lifecycleScope.launch {
             try {
-                val url = URL("$BASE_URL/verifyCode")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-
-                val postData = "email=${URLEncoder.encode(email, "UTF-8")}&code=${
-                    URLEncoder.encode(
-                        code,
-                        "UTF-8"
-                    )
-                }&token=$token"
-                conn.outputStream.use { os ->
-                    os.write(postData.toByteArray(StandardCharsets.UTF_8))
+                val responseCode = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response -> response.code }
                 }
 
-                val responseCode = conn.responseCode
-                runOnUiThread {
-                    when (responseCode) {
-                        200 -> {
-                            toast("E-Mail erfolgreich verifiziert")
-                            prefs.edit { putBoolean("verify", true) }
-                            loadCurrentSettings()
+                when (responseCode) {
+                    200 -> {
+                        toast("Verifizierungscode wurde gesendet")
+                        prefs.edit {
+                            putString("pendingEmail", email)
+                            putBoolean("codeRequested", true)
                         }
-                        400 -> toast("Ungültiger Code")
-                        502 -> toast("Netzwerkfehler")
-                        else -> toast("Fehler bei der Verifizierung (Code: $responseCode)")
+                        updateVerificationUi(prefs.getBoolean("verify", false))
+                        disableButton(btnRequestCode, "Erneut senden in ", "Code erneut anfordern", 60)
                     }
+                    401 -> toast("Ungültige Anmeldedaten")
+                    409 -> toast("Diese E-Mail-Adresse ist bereits vergeben")
+                    429 -> toast("Bitte warte kurz, bevor du einen neuen Code anforderst")
+                    502 -> toast("Netzwerkfehler")
+                    else -> toast("Fehler beim Senden des Codes (Code: $responseCode)")
                 }
-                conn.disconnect()
             } catch (e: Exception) {
-                Log.e("SettingsActivity", e.stackTrace.contentToString())
-                runOnUiThread { toast("Netzwerkfehler") }
+                Log.e("SettingsActivity", "Fehler beim Anfordern des Codes", e)
+                toast("Netzwerkfehler")
             }
-        }.start()
+        }
+    }
+
+    private fun verifyCode(code: String) {
+        val accessToken = prefs.getString("accessToken", "")
+        val body = FormBody.Builder()
+            .add("code", code)
+            .build()
+        val request = Request.Builder()
+            .url("$BASE_URL/verifyEmail")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .post(body)
+            .build()
+
+        lifecycleScope.launch {
+            try {
+                val responseCode = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response -> response.code }
+                }
+
+                when (responseCode) {
+                    200 -> {
+                        toast("E-Mail erfolgreich verifiziert")
+                        val verifiedEmail = prefs.getString("pendingEmail", "null") ?: "null"
+                        prefs.edit {
+                            putString("email", verifiedEmail)
+                            putBoolean("verify", true)
+                            putBoolean("codeRequested", false)
+                            remove("pendingEmail")
+                        }
+                        loadCurrentSettings()
+                    }
+                    400 -> toast("Ungültiger Code oder keine offene Verifizierung")
+                    401 -> toast("Ungültige Anmeldedaten")
+                    409 -> toast("Diese E-Mail-Adresse ist bereits vergeben")
+                    410 -> {
+                        toast("Der Code ist abgelaufen, bitte fordere einen neuen an")
+                        prefs.edit { putBoolean("codeRequested", false) }
+                        updateVerificationUi(prefs.getBoolean("verify", false))
+                    }
+                    502 -> toast("Netzwerkfehler")
+                    else -> toast("Fehler bei der Verifizierung (Code: $responseCode)")
+                }
+            } catch (e: Exception) {
+                Log.e("SettingsActivity", "Fehler bei der Verifizierung", e)
+                toast("Netzwerkfehler")
+            }
+        }
     }
 
     private fun setNotificationPreference(
