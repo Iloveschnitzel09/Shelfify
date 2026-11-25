@@ -3,15 +3,10 @@ package de.schnitzel.shelfify.funktionen
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.Patterns
 import android.widget.Button
@@ -23,20 +18,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiClient
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.api.syncWithServer
-import de.schnitzel.shelfify.funktionen.sub.DatagroupService.inviteGroup
-import de.schnitzel.shelfify.funktionen.sub.DatagroupService.joinGroup
-import de.schnitzel.shelfify.funktionen.sub.DatagroupService.leaveGroup
 import de.schnitzel.shelfify.prefs
 import de.schnitzel.shelfify.util.adapter.MemberAdapter
 import de.schnitzel.shelfify.util.disableButton
@@ -45,11 +37,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.Request
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-import androidx.core.graphics.toColorInt
+
+private data class GroupMembersResponse(
+    val owner: Boolean,
+    val members: List<String>
+)
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var editTextEmail: EditText
@@ -57,16 +49,17 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var tvVerificationStatus: TextView
     private lateinit var verificationContainer: LinearLayout
 
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    @SuppressLint("UseSwitchCompatOrMaterialCode") // shitty IDE won't shut up
     private lateinit var switchNotifications: Switch
     private lateinit var btnVerify: Button
     private lateinit var btnRequestCode: Button
     private lateinit var btnInvite: Button
     private lateinit var etJoinCode: EditText
     private lateinit var btnJoin: Button
+    private lateinit var btnBlock: Button
     private lateinit var btnLeave: Button
     private lateinit var etInviteEmail: EditText
-    private lateinit var btnDeleteData : Button
+    private lateinit var btnDeleteData: Button
 
     private val client = ApiClient.client
 
@@ -75,11 +68,10 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
 
-        // UI-Elemente initialisieren
         editTextEmail = findViewById(R.id.etEmail)
         editTextVerificationCode = findViewById(R.id.etVerificationCode)
         tvVerificationStatus = findViewById(R.id.tvVerificationStatus)
-        verificationContainer = findViewById(R.id.verificationContainer) // NEU
+        verificationContainer = findViewById(R.id.verificationContainer)
         switchNotifications = findViewById(R.id.switchNotifications)
         btnRequestCode = findViewById(R.id.btnRequestCode)
         btnVerify = findViewById(R.id.btnVerify)
@@ -88,22 +80,17 @@ class SettingsActivity : AppCompatActivity() {
         etJoinCode = findViewById(R.id.etJoinCode)
         btnJoin = findViewById(R.id.btnJoin)
         btnLeave = findViewById(R.id.btnLeave)
+        btnBlock = findViewById(R.id.btnBlock)
         btnDeleteData = findViewById(R.id.btnDelete)
 
-        val emailHeader : MaterialCardView = findViewById(R.id.tvEmailHeader)
-        val emailSection : LinearLayout = findViewById(R.id.emailSection)
+        val emailHeader: MaterialCardView = findViewById(R.id.tvEmailHeader)
+        val emailSection: LinearLayout = findViewById(R.id.emailSection)
         val notifyHeader: MaterialCardView = findViewById(R.id.tvNotificationsHeader)
         val notifySection: LinearLayout = findViewById(R.id.notificationsSection)
         val groupHeader: MaterialCardView = findViewById(R.id.tvGroupHeader)
         val groupSection: LinearLayout = findViewById(R.id.groupSection)
-        val memberHeader: MaterialCardView = findViewById(R.id.tvMemberHeader)
-        val memberSection: LinearLayout = findViewById(R.id.memberSection)
         val deleteHeader: MaterialCardView = findViewById(R.id.tvDeleteHeader)
         val deleteSection: LinearLayout = findViewById(R.id.deleteSection)
-
-
-        var email: String
-        val token = prefs.getString("token", "null") ?: "null"
 
         loadCurrentSettings()
 
@@ -122,29 +109,19 @@ class SettingsActivity : AppCompatActivity() {
                 toast("E-Mail muss erst hinzugefügt werden")
             }
         }
-        memberHeader.setOnClickListener {
-            if (!prefs.getString("email", "null").equals("null")) {
-                showMembers()
-                memberSection.isVisible = !memberSection.isVisible
-            } else {
-                toast("E-Mail muss erst hinzugefügt werden")
-            }
-        }
         deleteHeader.setOnClickListener {
             deleteSection.isVisible = !deleteSection.isVisible
         }
 
-        // GEÄNDERT: E-Mail kommt jetzt direkt aus dem Eingabefeld, speichern gibt es nicht mehr
         btnRequestCode.setOnClickListener {
-            val etemail = editTextEmail.text.toString().trim()
-            if (isValidEmail(etemail)) {
-                requestVerificationCode(etemail)
+            val email = editTextEmail.text.toString().trim()
+            if (isValidEmail(email)) {
+                requestVerificationCode(email)
             } else {
                 toast("Bitte gültige E-Mail-Adresse eingeben")
             }
         }
 
-        // GEÄNDERT: verifyCode braucht nur noch den Code
         btnVerify.setOnClickListener {
             val code = editTextVerificationCode.text.toString().trim()
             if (code.length == 6) {
@@ -155,13 +132,12 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         switchNotifications.setOnClickListener { _ ->
-            email = prefs.getString("email", "null") ?: "null"
             if (prefs.getBoolean("verify", false)) {
-                setNotificationPreference(email, true, token, prefs)
+                setNotificationPreference(true)
                 prefs.edit { putBoolean("verify", true) }
             } else {
                 switchNotifications.isChecked = false
-                setNotificationPreference(email, false, token, prefs)
+                setNotificationPreference(false)
                 prefs.edit { putBoolean("verify", false) }
                 toast("E-Mail muss erst verifiziert werden")
             }
@@ -176,17 +152,19 @@ class SettingsActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            inviteGroup(prefs, email, this)
-            etJoinCode.text.clear()
+            inviteGroup(email)
+            etInviteEmail.text.clear()
         }
 
         btnJoin.setOnClickListener {
-            val code = etJoinCode.text.toString()
-            if (code.isEmpty() || code.length != 6) {
-                toast("Bitte gültigen Einladungscode eingeben")
-                return@setOnClickListener
-            }
-            joinGroup(prefs, code, this)
+            val code = getCode() ?: return@setOnClickListener
+            joinGroup(code)
+            etJoinCode.text.clear()
+        }
+
+        btnBlock.setOnClickListener {
+            val code = getCode() ?: return@setOnClickListener
+            blockGroup(code)
             etJoinCode.text.clear()
         }
 
@@ -195,7 +173,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setTitle("Gruppe verlassen")
                 .setMessage("Bist du sicher, dass du die Datengruppe verlassen möchtest?")
                 .setPositiveButton("Ja") { _, _ ->
-                    leaveGroup(prefs, this)
+                    leaveGroup()
                     showMembers()
                 }
                 .setNegativeButton("Abbrechen", null)
@@ -206,10 +184,19 @@ class SettingsActivity : AppCompatActivity() {
             deleteConfirmation()
         }
 
+        showMembers()
         findViewById<TextView>(R.id.textViewVersion).text = getAppVersionText()
     }
 
-    @SuppressLint("SetTextI18n")
+    private fun getCode(): String? {
+        val code = etJoinCode.text.toString()
+        if (code.isEmpty() || code.length != 6) {
+            toast("Bitte gültigen Einladungscode eingeben")
+            return null
+        }
+        return code
+    }
+
     private fun loadCurrentSettings() {
         lifecycleScope.launch {
             val email = prefs.getString("email", "null") ?: "null"
@@ -222,7 +209,6 @@ class SettingsActivity : AppCompatActivity() {
                 editTextEmail.text.clear()
             }
 
-            // Verifizierungsstatus anzeigen
             val verified = prefs.getBoolean("verify", false)
             val notify = prefs.getBoolean("notify", false)
 
@@ -279,8 +265,14 @@ class SettingsActivity : AppCompatActivity() {
                             putBoolean("codeRequested", true)
                         }
                         updateVerificationUi(prefs.getBoolean("verify", false))
-                        disableButton(btnRequestCode, "Erneut senden in ", "Code erneut anfordern", 60)
+                        disableButton(
+                            btnRequestCode,
+                            "Erneut senden in ",
+                            "Code erneut anfordern",
+                            60
+                        )
                     }
+
                     401 -> toast("Ungültige Anmeldedaten")
                     409 -> toast("Diese E-Mail-Adresse ist bereits vergeben")
                     429 -> toast("Bitte warte kurz, bevor du einen neuen Code anforderst")
@@ -323,6 +315,7 @@ class SettingsActivity : AppCompatActivity() {
                         }
                         loadCurrentSettings()
                     }
+
                     400 -> toast("Ungültiger Code oder keine offene Verifizierung")
                     401 -> toast("Ungültige Anmeldedaten")
                     409 -> toast("Diese E-Mail-Adresse ist bereits vergeben")
@@ -331,6 +324,7 @@ class SettingsActivity : AppCompatActivity() {
                         prefs.edit { putBoolean("codeRequested", false) }
                         updateVerificationUi(prefs.getBoolean("verify", false))
                     }
+
                     502 -> toast("Netzwerkfehler")
                     else -> toast("Fehler bei der Verifizierung (Code: $responseCode)")
                 }
@@ -341,188 +335,239 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun setNotificationPreference(
-        email: String,
-        notify: Boolean,
-        token: String,
-        prefs: SharedPreferences
-    ) {
-        Thread {
+    private fun setNotificationPreference(notify: Boolean) {
+        val accessToken = prefs.getString("accessToken", "")
+        val body = FormBody.Builder()
+            .add("notify", notify.toString())
+            .build()
+        val request = Request.Builder()
+            .url("$BASE_URL/updateNotify")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .post(body)
+            .build()
+
+        lifecycleScope.launch {
             try {
-                val url = URL("$BASE_URL/setNotifyPreference")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-
-                val postData = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    "email=${URLEncoder.encode(email, StandardCharsets.UTF_8)}&token=$token"
-                } else {
-                    "email=${URLEncoder.encode(email, "UTF-8")}&token=$token"
+                val responseCode = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response -> response.code }
                 }
 
-                conn.outputStream.use { os ->
-                    os.write(postData.toByteArray(StandardCharsets.UTF_8))
-                }
-
-                val responseCode = conn.responseCode
-                runOnUiThread {
-                    when (responseCode) {
-                        200 -> {
-                            prefs.edit { putBoolean("notify", notify) }
-                            toast("Benachrichtigungseinstellungen gespeichert")
-                        }
-                        401 -> {
-                            toast("Ungültige Anmeldedaten")
-                            switchNotifications.isChecked = !notify
-                        }
-                        502 -> {
-                            toast("Netzwerkfehler")
-                            switchNotifications.isChecked = !notify
-                        }
-                        else -> {
-                            toast("Fehler beim Speichern der Einstellungen (Code: $responseCode)")
-                            switchNotifications.isChecked = !notify
-                        }
+                when (responseCode) {
+                    200 -> {
+                        prefs.edit { putBoolean("notify", notify) }
+                        toast("Benachrichtigungseinstellungen gespeichert")
                     }
-                }
-                conn.disconnect()
-            } catch (e: Exception) {
-                Log.e("SettingsActivity", e.stackTrace.contentToString())
-                runOnUiThread {
-                    toast("Netzwerkfehler")
-                }
-            }
-        }.start()
-    }
 
-    private fun saveEmail(email: String, prefs: SharedPreferences) {
-        Thread {
-            try {
-                val id = prefs.getInt("app_id", -1)
-                val token = prefs.getString("token", null)
-
-                val formBody = FormBody.Builder()
-                    .add("email", email)
-                    .add("id", id.toString())
-                    .add("token", token ?: "")
-                    .build()
-
-                val request = Request.Builder()
-                    .url("$BASE_URL/setEmail")
-                    .post(formBody)
-                    .build()
-
-                val response =  client.newCall(request).execute()
-
-                if (response.isSuccessful) prefs.edit {
-                    putString("email", email)
-                    putBoolean("verify", false)
-                    putBoolean("notify", false)
-                }
-
-                runOnUiThread {
-                    when (response.code) {
-                        200 -> {
-                            toast("E-Mail-Adresse gespeichert")
-                            //syncWithServer()
-                            loadCurrentSettings()
-                        }
-                        409 -> Toast.makeText(
-                            this,
-                            "Diese E-Mail wird bereits verwendet",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        401 -> toast("Ungültiger Token")
-                        502 -> toast("Netzwerkfehler")
-                        else -> toast("Fehler beim Speichern (Code: ${response.code})")
+                    401 -> {
+                        toast("Ungültige Anmeldedaten")
+                        switchNotifications.isChecked = !notify
                     }
+
+                    502 -> {
+                        toast("Netzwerkfehler")
+                        switchNotifications.isChecked = !notify
+                    }
+
+                    else -> {
+                        toast("Fehler beim Speichern der Einstellungen (Code: $responseCode)")
+                        switchNotifications.isChecked = !notify
+                    }
+
                 }
             } catch (e: Exception) {
                 Log.e("SettingsActivity", e.stackTrace.contentToString())
-                runOnUiThread { toast("Netzwerkfehler") }
+                toast("Netzwerkfehler")
             }
-        }.start()
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun showMembers() {
-        Thread{
-            val token = prefs.getString("token", "null")
-            val id = prefs.getInt("app_id", -1)
-            val url = "${BASE_URL}/datagroupMembers?id=$id&token=$token"
-
-            val request = Request.Builder()
-                .url(url)
-                .build()
-
-            val response = client.newCall(request).execute()
-            if (response.isSuccessful){
-                if (response.body != null) {
-                    val gson = Gson()
-                    val listType = object : TypeToken<List<Map<String, List<String>>>>() {}.type
-                    val data: List<Map<String, List<String>>> = gson.fromJson(response.body?.charStream(), listType)
-
-                    val owner = data.firstOrNull { it.containsKey("owner") }?.get("owner")?.firstOrNull()?.toBoolean() ?: false
-                    val members = data.firstOrNull { it.containsKey("members") }?.get("members") ?: emptyList()
-
-                    runOnUiThread {
-                        val recyclerView : RecyclerView = findViewById(R.id.recyclerViewMembers)
-
-                        recyclerView.layoutManager = LinearLayoutManager(this)
-                        recyclerView.adapter = MemberAdapter(members, owner)
-                    }
-                }
-            } else {
-                runOnUiThread {
-                    when (response.code) {
-                        401 -> toast("Ungültige Anmeldedaten")
-                        502 -> toast("Netzwerkfehler")
-                        else -> toast("Fehler beim Laden der Mitglieder (Code: ${response.code})")
-                    }
-                }
-            }
-        }.start()
-    }
-    private fun colorVerifyText(verified: Boolean) {
-        val statusText : String
-        val color : Int
-        val start : Int
-        val end : Int
-
-        if(verified) {
-            statusText = "Verifizierungsstatus: Verifiziert"
-            start = statusText.indexOf("Verifiziert")
-            end = start + "Verifiziert".length
-            color = Color.GREEN
-        } else {
-            statusText = "Verifizierungsstatus: Nicht verifiziert"
-             start = statusText.indexOf("Nicht verifiziert")
-            end = start + "Nicht verifiziert".length
-            color = Color.RED
         }
-        val spannable = SpannableString(statusText)
+    }
 
-        spannable.setSpan(
-            ForegroundColorSpan(color),
-            start,
-            end,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
+    private fun inviteGroup(email: String) {
+        val accessToken = prefs.getString("accessToken", "")
+        val body = FormBody.Builder()
+            .add("email", email)
+            .build()
+        val request = Request.Builder()
+            .url("$BASE_URL/inviteUser")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .post(body)
+            .build()
 
-        tvVerificationStatus.text = spannable
+        lifecycleScope.launch {
+            try {
+                val responseCode = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response -> response.code }
+                }
+
+                when (responseCode) {
+                    200 -> toast("Einladung erfolgreich!")
+
+                    401 -> toast("Token ungültig!")
+
+                    403 -> toast("Blockierter Benutzer!")
+
+                    404 -> toast("Kein Nutzer mit der Email vorhanden")
+
+                    429 -> toast("Wurde schon eingeladen, bitte warte kurz")
+
+                    else -> toast("Fehler: $responseCode")
+                }
+
+            } catch (e: Exception) {
+                Log.e("SettingsActivity", e.stackTrace.contentToString())
+                toast("Netzwerkfehler")
+            }
+        }
+    }
+
+    fun joinGroup(invCode: String) {
+        val accessToken = prefs.getString("accessToken", "")
+        val body = FormBody.Builder()
+            .add("code", invCode)
+            .build()
+        val request = Request.Builder()
+            .url("$BASE_URL/acceptInvitation")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .post(body)
+            .build()
+
+        lifecycleScope.launch {
+            try {
+                val responseCode = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response -> response.code }
+                }
+
+                when (responseCode) {
+                    200 -> toast("Beitritt erfolgreich!")
+
+                    401 -> toast("Token ungültig!")
+
+                    403 -> toast("Sie sind nicht der Empfänger dieser Einladung.")
+
+                    else -> toast("Fehler: $responseCode")
+                }
+
+            } catch (e: Exception) {
+                Log.e("SettingsActivity", e.stackTrace.contentToString())
+                toast("Netzwerkfehler")
+            }
+        }
+    }
+
+    fun blockGroup(invCode: String) {
+        val accessToken = prefs.getString("accessToken", "")
+        val body = FormBody.Builder()
+            .add("code", invCode)
+            .build()
+        val request = Request.Builder()
+            .url("$BASE_URL/blockInvitation")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .post(body)
+            .build()
+
+        lifecycleScope.launch {
+            try {
+                val responseCode = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response -> response.code }
+                }
+
+                when (responseCode) {
+                    200 -> toast("Einladung blockiert!")
+
+                    401 -> toast("Token ungültig!")
+
+                    403 -> toast("Einladungscode ungültig!")
+
+                    else -> toast("Fehler: $responseCode")
+                }
+
+            } catch (e: Exception) {
+                Log.e("SettingsActivity", e.stackTrace.contentToString())
+                toast("Netzwerkfehler")
+            }
+        }
+    }
+
+    private fun leaveGroup() {
+        val accessToken = prefs.getString("accessToken", "")
+        val body = FormBody.Builder().build()
+        val request = Request.Builder()
+            .url("$BASE_URL/leaveGroup")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .post(body)
+            .build()
+
+        lifecycleScope.launch {
+            try {
+                val responseCode = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response -> response.code }
+                }
+
+                when (responseCode) {
+                    200 -> toast("Verlassen erfolgreich!")
+
+                    400 -> toast("Ungültige Anfrage!")
+
+                    401 -> toast("Token ungültig!")
+
+                    else -> toast("Fehler: $responseCode")
+                }
+            } catch (e: Exception) {
+                Log.e("SettingsActivity", e.stackTrace.contentToString())
+                toast("Netzwerkfehler")
+            }
+        }
+    }
+
+    private fun showMembers() {
+        val accessToken = prefs.getString("accessToken", "")
+        val request = Request.Builder()
+            .url("$BASE_URL/groupMembers")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .post(FormBody.Builder().build())
+            .build()
+
+        lifecycleScope.launch {
+            try {
+                val (code, data) = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response ->
+                        val parsed = if (response.isSuccessful) {
+                            Gson().fromJson(
+                                response.body?.string(),
+                                GroupMembersResponse::class.java
+                            )
+                        } else null
+                        response.code to parsed
+                    }
+                }
+
+                when {
+                    data != null -> {
+                        val rvMembers = findViewById<RecyclerView>(R.id.rvMembers)
+                        rvMembers.layoutManager = LinearLayoutManager(this@SettingsActivity)
+                        rvMembers.adapter = MemberAdapter(data.members.toMutableList(), data.owner)
+                    }
+
+                    code == 401 -> toast("Ungültige Anmeldedaten")
+                    code == 502 -> toast("Netzwerkfehler")
+                    else -> toast("Fehler beim Laden der Mitglieder (Code: $code)")
+                }
+            } catch (e: Exception) {
+                Log.e("SettingsActivity", "Fehler beim Laden der Mitglieder", e)
+                toast("Netzwerkfehler")
+            }
+        }
     }
 
     private fun deleteConfirmation() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Daten löschen")
-        builder.setMessage("Möchtest du deine Daten wirklich entgültig löschen?")
+        builder.setMessage("Möchtest du deine Daten wirklich endgültig löschen?")
         var pos = false
 
         builder.setPositiveButton(
 
             "OK"
-        ) { _,_ ->
+        ) { _, _ ->
             if (pos) {
                 pos = false
 
@@ -535,7 +580,8 @@ class SettingsActivity : AppCompatActivity() {
 
         }
 
-        builder.setNegativeButton("Abbrechen"
+        builder.setNegativeButton(
+            "Abbrechen"
         ) { dialog: DialogInterface?, _ ->
             dialog!!.cancel()
         }
@@ -566,6 +612,7 @@ class SettingsActivity : AppCompatActivity() {
                         }
                         syncWithServer(prefs)
                     }
+
                     401 -> toast("Ungültige Anmeldedaten")
                     502 -> toast("Netzwerkfehler")
                     else -> toast("Fehler beim Entfernen (Code: $responseCode)")

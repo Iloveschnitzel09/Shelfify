@@ -42,7 +42,7 @@
                         android:layout_weight="1"
                         android:text="@string/e_mail_einstellungen"
                         android:textColor="@color/teal_700"
-                        android:textSize="16sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -60,6 +60,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:visibility="gone"
                     android:paddingTop="8dp">
 
                     <TextView
@@ -188,7 +189,7 @@
                     android:background="?attr/selectableItemBackground"
                     android:text="Benachrichtigungen"
                     android:textColor="@color/teal_700"
-                    android:textSize="16sp"
+                    android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -226,10 +227,10 @@
             android:id="@+id/tvGroupHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="6dp"
+            android:layout_marginBottom="16dp"
             app:cardBackgroundColor="#1E1E1E"
-            android:layout_marginBottom="16dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -243,7 +244,7 @@
                     android:background="?attr/selectableItemBackground"
                     android:text="Gruppenverwaltung"
                     android:textColor="@color/teal_700"
-                    android:textSize="16sp"
+                    android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -251,13 +252,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone"
-                    android:paddingTop="8dp">
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
+
+                    <!-- 1. Menschen zu Gruppe einladen -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:text="Menschen zu Gruppe einladen"
+                        android:textColor="@color/teal_200"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="12dp"
                         android:text="@string/hint_datagroup_0"
                         android:textColor="@color/teal_100"
                         android:textSize="14sp" />
@@ -266,7 +277,8 @@
                         android:id="@+id/datagoupContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal">
 
                         <EditText
@@ -275,94 +287,161 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:backgroundTint="@color/teal_200"
-                            android:hint="Email zum einladen"
+                            android:hint="E-Mail der Person"
                             android:importantForAutofill="no"
                             android:inputType="textEmailAddress"
                             android:textColor="@color/teal_200"
                             android:textColorHint="#AAAAAA" />
 
-                        <Button
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnInvite"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:backgroundTint="@color/teal_200"
-                            android:text=" einladen "
-                            android:textColor="@color/teal_700" />
+                            android:text="Einladen"
+                            android:textAllCaps="false"
+                            android:textColor="@color/teal_700"
+                            app:cornerRadius="8dp" />
                     </LinearLayout>
 
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="#444444" />
+
+                    <!-- 2. Empfangenen Einladungscode eingeben -->
                     <LinearLayout
                         android:id="@+id/datagoupJoinContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="horizontal">
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="6dp"
+                            android:text="Empfangenen Einladungscode verarbeiten"
+                            android:textColor="@color/teal_200"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
                         <EditText
                             android:id="@+id/etJoinCode"
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:backgroundTint="@color/teal_200"
-                            android:hint="Code zum beitereten"
+                            android:hint="Einladungscode eingeben"
+                            android:imeOptions="actionDone"
                             android:importantForAutofill="no"
-                            android:inputType="textEmailAddress"
+                            android:inputType="textNoSuggestions"
+                            android:maxLength="6"
+                            android:maxLines="1"
                             android:textColor="@color/teal_200"
                             android:textColorHint="#AAAAAA" />
 
-                        <Button
-                            android:id="@+id/btnJoin"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:backgroundTint="@color/teal_200"
-                            android:text="beitreten"
-                            android:textColor="@color/teal_700" />
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnJoin"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="4dp"
+                                android:layout_weight="1"
+                                android:backgroundTint="@color/teal_200"
+                                android:text="Beitreten"
+                                android:textAllCaps="false"
+                                android:textColor="@color/teal_700"
+                                app:cornerRadius="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnBlock"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:layout_weight="1"
+                                android:text="Blockieren"
+                                android:textAllCaps="false"
+                                android:textColor="#E57373"
+                                app:cornerRadius="8dp"
+                                app:strokeColor="#E57373" />
+                        </LinearLayout>
                     </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="#444444" />
+
+                    <!-- 3. Gruppe verlassen -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="6dp"
+                        android:text="Gruppe verlassen"
+                        android:textColor="#E57373"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLeave"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="#E57373"
+                        android:text="Gruppe verlassen"
+                        android:textAllCaps="false"
+                        android:textColor="#1E1E1E"
+                        app:cornerRadius="8dp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="4dp"
                         android:text="@string/hint_datagroup_1"
-                        android:textColor="@color/teal_100"
+                        android:textColor="#E57373"
                         android:textSize="14sp" />
-
-                    <Button
-                        android:id="@+id/btnLeave"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/teal_200"
-                        android:text="Gruppe verlassen"
-                        android:textColor="@color/teal_700" />
 
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Abschnitt: Gruppenmitglieder -->
+        <!-- Abschnitt: Mitglieder -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/tvMemberHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="6dp"
+            android:layout_marginBottom="16dp"
             app:cardBackgroundColor="#1E1E1E"
-            android:layout_marginBottom="16dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+
                 android:orientation="vertical"
                 android:padding="12dp">
+
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
-                    android:text="Gruppenmitglieder"
+                    android:text="Mitglieder"
                     android:textColor="@color/teal_700"
-                    android:textSize="16sp"
+                    android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -370,14 +449,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone"
-                    android:paddingTop="8dp">
+                    android:paddingTop="8dp"
+                    android:visibility="visible">
 
                     <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerViewMembers"
+                        android:id="@+id/rvMembers"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        />
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -409,7 +489,7 @@
                     android:background="?attr/selectableItemBackground"
                     android:text="Daten Löschen"
                     android:textColor="@color/teal_700"
-                    android:textSize="16sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"/>
 
                 <LinearLayout
