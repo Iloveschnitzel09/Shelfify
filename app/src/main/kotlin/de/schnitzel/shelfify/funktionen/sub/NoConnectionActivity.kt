@@ -1,4 +1,4 @@
-package de.schnitzel.shelfify.funktionen
+package de.schnitzel.shelfify.funktionen.sub
 
 import android.os.Bundle
 import android.view.View
@@ -82,7 +82,8 @@ class NoConnectionActivity : AppCompatActivity() {
         if (ok) {
             finish() // zurück in die Activity, die vorher offen war (lädt ihre Daten neu)
         } else if (manual) {
-            tvStatus.text = "Der Server ist nicht erreichbar.\nBitte Verbindung prüfen und erneut versuchen."
+            tvStatus.text =
+                "Der Server ist nicht erreichbar.\nBitte Verbindung prüfen und erneut versuchen."
         }
     }
 

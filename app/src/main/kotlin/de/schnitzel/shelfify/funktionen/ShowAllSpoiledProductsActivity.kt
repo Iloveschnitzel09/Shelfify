@@ -36,7 +36,7 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
 
         prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
 
-        val etSearch : EditText = findViewById(R.id.etSearch)
+        val etSearch: EditText = findViewById(R.id.etSearch)
         val btnSearch: Button = findViewById(R.id.btnSearch)
 
         recyclerView = findViewById(R.id.recyclerView)
@@ -45,8 +45,8 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
         btnSearch.setOnClickListener {
             val searchTerm = etSearch.text.toString().lowercase()
 
-            if(loadedProducts.isEmpty()) {
-                Toast.makeText(this@ShowAllSpoiledProductsActivity, "Produkte werden noch geladen, bitte warten!", Toast.LENGTH_SHORT).show()
+            if (loadedProducts.isEmpty()) {
+                toast("Produkte werden noch geladen, bitte warten!")
                 return@setOnClickListener
             }
 
@@ -54,8 +54,8 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
                 product.name.lowercase().contains(searchTerm)
             }
 
-            if(filteredList.isEmpty()) {
-                Toast.makeText(this@ShowAllSpoiledProductsActivity, "Keine Produkte gefunden!", Toast.LENGTH_SHORT).show()
+            if (filteredList.isEmpty()) {
+                toast("Keine Produkte gefunden!")
             } else {
                 recyclerView.adapter = ProductAdapter(filteredList)
             }
@@ -115,8 +115,12 @@ class ShowAllSpoiledProductsActivity : AppCompatActivity() {
                 loadedProducts = result
                 recyclerView.adapter = ProductAdapter(loadedProducts)
             } else {
-                Toast.makeText(this@ShowAllSpoiledProductsActivity, "Fehler beim Laden der Produkte!", Toast.LENGTH_SHORT).show()
+                toast("Fehler beim Laden der Produkte!")
             }
         }
+    }
+
+    private fun toast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

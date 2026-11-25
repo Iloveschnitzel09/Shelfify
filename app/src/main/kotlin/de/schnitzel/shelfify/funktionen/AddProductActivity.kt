@@ -84,7 +84,7 @@ class AddProductActivity : AppCompatActivity() {
             if (ean.isNotEmpty()) {
                 checkEan(ean)
             } else {
-                Toast.makeText(this, "Bitte EAN eingeben", Toast.LENGTH_SHORT).show()
+                toast("Bitte EAN eingeben")
             }
         }
 
@@ -97,7 +97,7 @@ class AddProductActivity : AppCompatActivity() {
             if (quantity.isEmpty()) quantity = "1"
 
             if (ean.isEmpty() || datum.isEmpty() || (editTextProductName.isVisible && name.isEmpty())) {
-                Toast.makeText(this, "Alle Felder ausfüllen", Toast.LENGTH_SHORT).show()
+                toast("Alle Felder ausfüllen")
                 return@setOnClickListener
             }
 
@@ -207,7 +207,7 @@ class AddProductActivity : AppCompatActivity() {
                     editTextProductName.setText(bodyString)
                     editTextProductName.isEnabled = false
                     addEan = false
-                    Toast.makeText(this@AddProductActivity, "Produktname gefunden", Toast.LENGTH_SHORT).show()
+                    toast("Produktname gefunden")
 
                 } else {
                     editTextProductName.text.clear()
@@ -215,19 +215,27 @@ class AddProductActivity : AppCompatActivity() {
                     addEan = true
 
                     when (code) {
-                        404 -> Toast.makeText(this@AddProductActivity, "Produktname nicht gefunden – bitte eintragen", Toast.LENGTH_SHORT).show()
-                        502 -> Toast.makeText(this@AddProductActivity, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
-                        else -> Toast.makeText(this@AddProductActivity, "Fehler: $code", Toast.LENGTH_SHORT).show()
+                        404 -> toast("Produktname nicht gefunden – bitte eintragen")
+
+                        502 -> toast("Netzwerkfehler")
+
+                        else -> toast("Fehler: $code")
                     }
                 }
             } catch (e: Exception) {
                 Log.e("AddProduct", "Fehler beim Abrufen der EAN", e)
-                Toast.makeText(this@AddProductActivity, "Fehler beim Abrufen", Toast.LENGTH_SHORT).show()
+                toast("Fehler beim Abrufen")
             }
         }
     }
 
-    private fun addNewProduct(ean: String, name: String, datum: String, add: Boolean, quantity: String) {
+    private fun addNewProduct(
+        ean: String,
+        name: String,
+        datum: String,
+        add: Boolean,
+        quantity: String
+    ) {
         val accessToken = prefs.getString("accessToken", "")
         lifecycleScope.launch {
             try {
@@ -251,11 +259,14 @@ class AddProductActivity : AppCompatActivity() {
 
                     if (!isSuccessful) {
                         when (eanCode) {
-                            400 -> Toast.makeText(this@AddProductActivity, "Fehler beim EAN-Hinzufügen", Toast.LENGTH_SHORT).show()
-                            409 -> Toast.makeText(this@AddProductActivity, "Name schon vorhanden", Toast.LENGTH_SHORT).show()
-                            502 -> Toast.makeText(this@AddProductActivity, "Netzwerkfehler", Toast.LENGTH_SHORT).show()
+                            400 -> toast("Fehler beim EAN-Hinzufügen")
+
+                            409 -> toast("Name schon vorhanden")
+
+                            502 -> toast("Netzwerkfehler")
+
                             else -> {
-                                Toast.makeText(this@AddProductActivity, "Unerwarteter EAN Fehler: $eanCode", Toast.LENGTH_SHORT).show()
+                                toast("Unerwarteter EAN Fehler: $eanCode")
                                 Log.e("AddProduct", "Unerwarteter Fehler: $eanCode$accessToken")
                             }
                         }
@@ -283,15 +294,17 @@ class AddProductActivity : AppCompatActivity() {
 
                 when (responseCode) {
                     200 -> {
-                        Toast.makeText(this@AddProductActivity, "Produkt hinzugefügt", Toast.LENGTH_SHORT).show()
+                        toast("Produkt hinzugefügt")
                         resetAndRestart()
                     }
-                    409 -> Toast.makeText(this@AddProductActivity, "Produktname oder EAN existiert bereits", Toast.LENGTH_SHORT).show()
-                    else -> Toast.makeText(this@AddProductActivity, "Fehler beim Hinzufügen (Code: $responseCode)", Toast.LENGTH_SHORT).show()
+
+                    409 -> toast("Produktname oder EAN existiert bereits")
+
+                    else -> toast("Fehler beim Hinzufügen (Code: $responseCode)")
                 }
             } catch (e: Exception) {
                 Log.e("AddProduct", "Fehler beim Hinzufügen des Produkts", e)
-                Toast.makeText(this@AddProductActivity, "Fehler beim Hinzufügen", Toast.LENGTH_SHORT).show()
+                toast("Fehler beim Hinzufügen")
             }
         }
     }
@@ -302,5 +315,9 @@ class AddProductActivity : AppCompatActivity() {
         } else {
             editTextEan.requestFocus()
         }
+    }
+
+    private fun toast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

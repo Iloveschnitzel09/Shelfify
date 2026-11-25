@@ -12,7 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import de.schnitzel.shelfify.funktionen.NoConnectionActivity
+import de.schnitzel.shelfify.funktionen.sub.NoConnectionActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
