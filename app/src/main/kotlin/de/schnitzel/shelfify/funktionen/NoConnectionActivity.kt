@@ -5,14 +5,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import de.schnitzel.shelfify.R
-import kotlinx.coroutines.launch
-import androidx.activity.OnBackPressedCallback
 import de.schnitzel.shelfify.api.ConnectionGuard
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 class NoConnectionActivity : AppCompatActivity() {

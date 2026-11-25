@@ -16,11 +16,10 @@ import de.schnitzel.shelfify.R
 import de.schnitzel.shelfify.api.ApiClient
 import de.schnitzel.shelfify.api.ApiConfig.BASE_URL
 import de.schnitzel.shelfify.api.ConnectionGuard
+import de.schnitzel.shelfify.api.productRequest
 import de.schnitzel.shelfify.util.Products
 import de.schnitzel.shelfify.util.adapter.ProductAdapter
-import de.schnitzel.shelfify.api.productRequest
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
 import okhttp3.Request
 
 class ShowAllSpoiledProductsActivity : AppCompatActivity() {
